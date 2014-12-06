@@ -23,6 +23,6 @@ public class AuctionRoom extends Application {
     }
     
     public AuctionRoom() {
-    	
+    	System.out.println("Hi");
     }
 }
