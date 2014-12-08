@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.jobbrown.auction_room.exceptions.IncorrectLoginException;
 import com.jobbrown.auction_room.helpers.JavaSpacesUserService;
+import com.jobbrown.auction_room.interfaces.helpers.UserService;
 import com.jobbrown.auction_room.thirdparty.gallen.SpaceUtils;
 
 import javafx.event.ActionEvent;
@@ -17,8 +18,6 @@ import javafx.stage.Stage;
 import net.jini.space.JavaSpace;
 
 public class LoginWindowController {
-    private JavaSpace space;
-
     @FXML public TextField loginUsername;
     @FXML public PasswordField loginPassword;
     @FXML public Label loginMessage;
@@ -31,13 +30,12 @@ public class LoginWindowController {
 
 
     public LoginWindowController() {
-        space = SpaceUtils.getSpace();
     }
 
     @FXML public boolean registerButtonClicked() {
     	if(validateRegistrationForm()) {
     		// Lets check if the username or e-mail are taken
-    		JavaSpacesUserService us = new JavaSpacesUserService();
+    		UserService us = new JavaSpacesUserService();
     		
     		if(us.isUsernameUnique(registerUsername.getText())) {
     			if(us.isEmailUnique(registerEmail.getText())) {

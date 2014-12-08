@@ -14,27 +14,6 @@ public class SpaceUtils {
     //public static String defaultHostname = "vb-job-ubuntu.home";
     private static JavaSpace instance = null;
 
-    /*
-    public static JavaSpace getSpace(String hostname) {
-        JavaSpace js = null;
-
-        try {
-            LookupLocator l = new LookupLocator("jini://" + hostname);
-
-            ServiceRegistrar sr = l.getRegistrar();
-
-            Class c = Class.forName("net.jini.space.JavaSpace");
-            Class[] classTemplate = {c};
-
-            js = (JavaSpace) sr.lookup(new ServiceTemplate(null, classTemplate, null));
-
-        } catch (Exception e) {
-            System.err.println("Error: " + e);
-        }
-
-        return js;
-    }
-    */
     public static JavaSpace getSpace(String hostname) {
         if(instance == null) {
             synchronized (SpaceUtils.class) {

@@ -2,16 +2,23 @@ package com.jobbrown.auction_room.helpers;
 
 import com.jobbrown.auction_room.exceptions.LotNotFoundException;
 import com.jobbrown.auction_room.interfaces.helpers.LotService;
+import com.jobbrown.auction_room.interfaces.helpers.TransactionService;
 import com.jobbrown.auction_room.models.Bid;
 import com.jobbrown.auction_room.models.Lot;
 import com.jobbrown.auction_room.models.Tail;
 import com.jobbrown.auction_room.thirdparty.gallen.SpaceUtils;
 
 import net.jini.core.entry.Entry;
+import net.jini.core.entry.UnusableEntryException;
 import net.jini.core.lease.Lease;
+import net.jini.core.transaction.CannotAbortException;
+import net.jini.core.transaction.CannotCommitException;
 import net.jini.core.transaction.Transaction;
+import net.jini.core.transaction.TransactionException;
+import net.jini.core.transaction.UnknownTransactionException;
 import net.jini.space.JavaSpace;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 /**
@@ -27,19 +34,28 @@ public class JavaSpacesLotService implements LotService {
         space = SpaceUtils.getSpace();
     }
 
+    
+    /**
+     * A quick override of the method requiring a transaction. Creates a transaction and uses that on the fly.
+     */
+    @Override
+	public boolean addLot(Lot t) {
+        TransactionService ts = new JavaSpacesTransactionService();
+        Transaction transaction = ts.getTransaction();
+
+        return addLot(t, transaction);
+    }
+    
     /**
      * This will take a Lot (or a subtype of) and then add it to the Lot. It will create a transaction, take the tail,
      * increment and commit all changes.
      *
      * @param t The lot to be added
+     * @param t The transaction to be used
      * @return boolean success
      */
-    @Override
-	public boolean addLot(Lot t) {
-        JavaSpacesTransactionService ts = new JavaSpacesTransactionService();
-        Transaction transaction = ts.getTransaction();
-
-        // Get the tail
+    public boolean addLot(Lot t, Transaction transaction) {
+    	// Get the tail
         Tail tail = getTail(transaction);
 
         // Increment the tail
@@ -127,27 +143,88 @@ public class JavaSpacesLotService implements LotService {
         }
     }
 
+    
+    public Entry getLot(Lot t, Transaction transaction) {
+		// Take the ID from the Lot and create a fresh template
+    	Lot searchLot = new Lot();
+    	searchLot.id = t.id;
+    	
+    	// Lets take the lot by that ID
+    	Lot retrievedLot = null;
+    	try {
+			retrievedLot = (Lot)space.take(searchLot, transaction, 1000);
+		} catch (RemoteException | UnusableEntryException
+				| TransactionException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			System.out.println("Failed to get the lot");
+			e.printStackTrace();
+		}
+
+    	return retrievedLot;
+    	
+    }
+ 
+    
     /**
      * Updates a lot on the JavaSpace, the old one is removed by ID then replaced with this
      * @param t
      * @return success boolean
      */
     public boolean updateLot(Lot t) {
-    	int ID = t.id;
-    	
-    	
-    	
-    	
+    	// Create a transaction
+    	TransactionService ts = new JavaSpacesTransactionService();
+        Transaction transaction = ts.getTransaction();
+           	
+        // Make a new lot from the ID
+        Lot lot = new Lot();
+        lot.id = t.id;
+        
+        // Take it from the space
+        Lot receivedLot = (Lot) getLot(lot, transaction);
+        
+        // Put the new one back in
+        if(addLot(t, transaction)) {
+        	return true;
+        }
     	
     	return false;
-    	
     }
+    /**
+     * 
+     * @param t
+     * @param b
+     * @return
+     */
     public boolean addBidToLot(Lot t, Bid b) {
+    	// Create a transaction
+    	TransactionService ts = new JavaSpacesTransactionService();
+        Transaction transaction = ts.getTransaction();
+        
     	// Take the lot from the space
+    	Lot lot = (Lot) getLot(t, transaction);
+    	
     	// Add the bid
+    	lot.addBidToLot(b);
     	
     	
-    	return false;
+		try {
+			if(this.addLot(lot)) {
+				transaction.commit();
+				return true;
+			} else {
+				try {
+					transaction.abort();
+				} catch (CannotAbortException e) {
+					System.err.println("Failed to abort");
+					e.printStackTrace();
+				} finally {
+					return false;
+				}
+			}
+		} catch (UnknownTransactionException | CannotCommitException | RemoteException e) {
+			System.err.println("Failed");
+			return false;
+		}
     }
     
     /**

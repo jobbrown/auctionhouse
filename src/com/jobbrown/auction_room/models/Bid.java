@@ -1,5 +1,7 @@
 package com.jobbrown.auction_room.models;
 
+import java.util.Date;
+
 /**
  * Created by job on 21/10/14.
  */
@@ -9,10 +11,13 @@ public class Bid {
 	public boolean publicBid;
 	
 	// How much was this bid for
-	public double amount;
+	public Double amount;
 	
 	// Who was it made by
 	public Integer bidder;
+	
+	// When was this bid made
+	public Date date;
 	
 	/**
 	 * Empty constructor for good measure
@@ -22,10 +27,11 @@ public class Bid {
     }
     
 
-    public Bid(Boolean publicBid, double amount, Integer bidder) {
+    public Bid(Boolean publicBid, double amount, Integer bidder, Date date) {
     	this.publicBid = publicBid;
     	this.amount = amount;
     	this.bidder = bidder;
+    	this.date = date;
     }
 
 }

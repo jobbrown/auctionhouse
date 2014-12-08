@@ -53,5 +53,20 @@ public interface UserService {
      * @throws UserNotFoundException
      */
     public User searchForUser(User u) throws UserNotFoundException;
+    
+    /**
+     * Checks if a username is unused by any other user
+     * @param username
+     * @return if username is unique
+     */
+    public boolean isUsernameUnique(String username);
+    
+    /**
+     * Checks if a given e-mail address is unused by any other user
+     * @param email
+     * @return if email is unique
+     */
+    public boolean isEmailUnique(String email);
+    
 
 }

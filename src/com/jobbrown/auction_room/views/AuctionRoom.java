@@ -1,5 +1,7 @@
 package com.jobbrown.auction_room.views;
 
+import com.jobbrown.auction_room.helpers.JavaSpacesLotService;
+
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -23,6 +25,10 @@ public class AuctionRoom extends Application {
     }
     
     public AuctionRoom() {
-    	System.out.println("Hi");
+    	// Example usage
+    	
+    	// addBidToLot(lotID 1, bid amount, bid public, bid by) 
+    	JavaSpacesLotService ls = new JavaSpacesLotService();
+    	
     }
 }

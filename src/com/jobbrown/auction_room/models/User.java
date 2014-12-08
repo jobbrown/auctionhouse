@@ -9,7 +9,8 @@ import java.util.Random;
  * Created by job on 01/12/14.
  */
 public class User implements Entry {
-    public Integer id = null;
+	private static final long serialVersionUID = -5039963350541765684L;
+	public Integer id = null;
     public String username;
     public String salt;
     public String password;

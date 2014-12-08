@@ -6,7 +6,9 @@ import net.jini.core.entry.Entry;
  * Created by job on 30/10/14.
  */
 public class Tail implements Entry {
-    public String channel;
+	private static final long serialVersionUID = -2098967834853620599L;
+	
+	public String channel;
     public Integer position;
 
     public Tail() {
