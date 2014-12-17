@@ -25,9 +25,9 @@
             <Label text="Username" GridPane.rowIndex="1" />
             <Label text="Password" GridPane.rowIndex="2" />
             <TextField fx:id="loginUsername" promptText="Username" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <PasswordField fx:id="loginPassword" promptText="Password" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             <Button fx:id="loginButton" mnemonicParsing="false" onAction="#loginButtonClicked" text="Login" GridPane.columnIndex="1" GridPane.rowIndex="3" />
             <Label fx:id="loginMessage" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-            <PasswordField fx:id="loginPassword" promptText="Password" GridPane.columnIndex="1" GridPane.rowIndex="2" />
          </children>
          <padding>
             <Insets right="30.0" />
@@ -48,12 +48,12 @@
          <children>
             <Label text="Register" />
             <Label text="Username" GridPane.rowIndex="1" />
-            <TextField fx:id="registerUsername" promptText="Username" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             <Label text="Password" GridPane.rowIndex="2" />
             <Label text="Email Address" GridPane.rowIndex="3" />
+            <TextField fx:id="registerUsername" promptText="Username" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <PasswordField fx:id="registerPassword" promptText="Password" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             <TextField fx:id="registerEmail" promptText="E-Mail Address" GridPane.columnIndex="1" GridPane.rowIndex="3" />
             <Button fx:id="registerButton" mnemonicParsing="false" onAction="#registerButtonClicked" text="Register" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-            <PasswordField fx:id="registerPassword" promptText="Password" GridPane.columnIndex="1" GridPane.rowIndex="2" />
          </children>
       </GridPane>
    </children>

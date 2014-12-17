@@ -46,23 +46,33 @@ public class JavaSpacesLotService implements LotService {
         return addLot(t, transaction);
     }
     
+    
+    public boolean addLot(Lot t, Transaction transaction) {
+    	return this.addLot(t, transaction, true);
+    }
+    
     /**
      * This will take a Lot (or a subtype of) and then add it to the Lot. It will create a transaction, take the tail,
      * increment and commit all changes.
      *
      * @param t The lot to be added
      * @param t The transaction to be used
+     * @param updateID should we increment the ID used for this object
      * @return boolean success
      */
-    public boolean addLot(Lot t, Transaction transaction) {
+    public boolean addLot(Lot t, Transaction transaction, boolean updateID) {
     	// Get the tail
         Tail tail = getTail(transaction);
 
-        // Increment the tail
-        tail.increment();
-
-        // Set the ID on the new lot
-        t.id = tail.position;
+        if(updateID) {
+	        // Increment the tail
+	        tail.increment();
+        
+        	// Set the ID on the new lot
+            t.id = tail.position;
+        }
+        
+        System.out.println("Inserting with id " + tail.position);
 
         // Write the tail back
         try {
@@ -83,7 +93,7 @@ public class JavaSpacesLotService implements LotService {
 
         return true;
     }
-
+    
     /**
      * Returns an arraylist of all lots in the space
      *
@@ -145,14 +155,15 @@ public class JavaSpacesLotService implements LotService {
 
     
     public Entry getLot(Lot t, Transaction transaction) {
+    	System.out.println("Searching for lot with ID " + t.id);
+    	
 		// Take the ID from the Lot and create a fresh template
-    	Lot searchLot = new Lot();
-    	searchLot.id = t.id;
+    	Lot searchLot = this.stripAllProperties(t);
     	
     	// Lets take the lot by that ID
     	Lot retrievedLot = null;
     	try {
-			retrievedLot = (Lot)space.take(searchLot, transaction, 1000);
+			retrievedLot = (Lot) space.take(searchLot, transaction, 5000);
 		} catch (RemoteException | UnusableEntryException
 				| TransactionException | InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -176,14 +187,13 @@ public class JavaSpacesLotService implements LotService {
         Transaction transaction = ts.getTransaction();
            	
         // Make a new lot from the ID
-        Lot lot = new Lot();
-        lot.id = t.id;
+        Lot lot = this.stripAllProperties(t);
         
         // Take it from the space
         Lot receivedLot = (Lot) getLot(lot, transaction);
         
         // Put the new one back in
-        if(addLot(t, transaction)) {
+        if(addLot(t, transaction, false)) {
         	return true;
         }
     	
@@ -200,15 +210,35 @@ public class JavaSpacesLotService implements LotService {
     	TransactionService ts = new JavaSpacesTransactionService();
         Transaction transaction = ts.getTransaction();
         
-    	// Take the lot from the space
-    	Lot lot = (Lot) getLot(t, transaction);
+        // Create empty lot
+        t = this.stripAllProperties(t);
+        
+    	// Read the lot from the space
+    	Lot lot;
+		try {
+			lot = (Lot) searchForLot(t);
+		} catch (LotNotFoundException e1) {
+			e1.printStackTrace();
+			return false;
+		}
+    	
+    	if(lot == null) {
+    		System.out.println("Received lot was null");
+    		try {
+				transaction.abort();
+			} catch (UnknownTransactionException | CannotAbortException
+					| RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    		return false;
+    	}
     	
     	// Add the bid
     	lot.addBidToLot(b);
     	
-    	
 		try {
-			if(this.addLot(lot)) {
+			if(this.updateLot(lot)) {
 				transaction.commit();
 				return true;
 			} else {
@@ -225,6 +255,19 @@ public class JavaSpacesLotService implements LotService {
 			System.err.println("Failed");
 			return false;
 		}
+    }
+    
+    
+    /**
+     * Takes a lot and removes all properies except ID
+     * @param t the lot
+     * @return the lot with all params unset
+     */
+    public Lot stripAllProperties(Lot t) {
+    	Lot lot = new Lot();
+    	lot.id = t.id;
+    	
+    	return lot;
     }
     
     /**

@@ -35,7 +35,7 @@ public class LoginWindowController {
     @FXML public boolean registerButtonClicked() {
     	if(validateRegistrationForm()) {
     		// Lets check if the username or e-mail are taken
-    		UserService us = new JavaSpacesUserService();
+    		UserService us = JavaSpacesUserService.getInstance();
     		
     		if(us.isUsernameUnique(registerUsername.getText())) {
     			if(us.isEmailUnique(registerEmail.getText())) {
@@ -67,7 +67,7 @@ public class LoginWindowController {
     @FXML public void loginButtonClicked(ActionEvent event) {
         if(validateLoginForm()) {
             // Check if the login is value
-            JavaSpacesUserService us = new JavaSpacesUserService();
+            UserService us = JavaSpacesUserService.getInstance();
             try {
                 if(us.login(loginUsername.getText(), loginPassword.getText())) {
                     // The login was correct
@@ -78,6 +78,7 @@ public class LoginWindowController {
                     Stage stage = (Stage) node.getScene().getWindow();
                     Scene scene = stage.getScene();
                     
+                    
                     FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MainWindow.fxml"));
                     Parent root = null;
 					try {
@@ -86,6 +87,7 @@ public class LoginWindowController {
 						e.printStackTrace();
 					}
                     scene.setRoot(root);
+                    stage.sizeToScene();
                 }
             } catch (IncorrectLoginException e) {
                 loginMessage.setText(e.getMessage());

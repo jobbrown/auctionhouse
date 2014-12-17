@@ -101,5 +101,12 @@ public class BidList {
 		
 		return new BidList(newBidList);
 	}
+	
+	public int count() {
+		if(this.bidList == null) {
+			return 0;
+		}
+		return this.bidList.size();
+	}
 
 }

@@ -31,6 +31,7 @@ public class SpaceUtils {
 
                 } catch (Exception e) {
                     System.err.println("Error: " + e);
+                    System.exit(-1);
                 }
                 instance = js;
             }

@@ -20,8 +20,24 @@ public class JavaSpacesUserService implements UserService {
     String channelName = "users";
 
     User activeUser = null;
+    
+    private static volatile JavaSpacesUserService instance = null;
 
-    public JavaSpacesUserService() { this.space = SpaceUtils.getSpace(); }
+    public static JavaSpacesUserService getInstance() {
+        if (instance == null) {
+            synchronized (JavaSpacesUserService.class) {
+                if (instance == null) {
+                    instance = new JavaSpacesUserService();
+                }
+            }
+        }
+ 
+        return instance;
+    }
+    
+    private JavaSpacesUserService() { 
+    	this.space = SpaceUtils.getSpace(); 
+    }
 
     
     /**

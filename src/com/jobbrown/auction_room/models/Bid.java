@@ -1,11 +1,12 @@
 package com.jobbrown.auction_room.models;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Created by job on 21/10/14.
  */
-public class Bid {
+public class Bid implements Serializable {
 	
 	// is this a public bid
 	public boolean publicBid;
@@ -34,4 +35,8 @@ public class Bid {
     	this.date = date;
     }
 
+    @Override
+	public String toString() {
+		return "Bid (" + publicBid + ") by User ID: " + this.bidder + " for £" + this.amount + " on " + this.date;
+    }
 }
