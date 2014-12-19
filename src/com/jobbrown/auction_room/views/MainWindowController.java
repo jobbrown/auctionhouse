@@ -3,16 +3,8 @@ package com.jobbrown.auction_room.views;
 
 import java.io.IOException;
 import java.net.URL;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ResourceBundle;
-
-import javafx.util.Callback;
-
-import com.jobbrown.auction_room.enums.Category;
-import com.jobbrown.auction_room.helpers.JavaSpacesLotService;
-import com.jobbrown.auction_room.interfaces.helpers.LotService;
-import com.jobbrown.auction_room.models.Lot;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -26,9 +18,14 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.util.Callback;
+
+import com.jobbrown.auction_room.enums.Category;
+import com.jobbrown.auction_room.helpers.JavaSpacesLotService;
+import com.jobbrown.auction_room.interfaces.helpers.LotService;
+import com.jobbrown.auction_room.models.Lot;
 
 public class MainWindowController implements Initializable {
 	// View Lots Tab
@@ -120,6 +117,7 @@ public class MainWindowController implements Initializable {
 		    }
 		);
 		
+		// Bind price to the model
 		tcPrice.setCellValueFactory(new Callback<CellDataFeatures<Lot, String>, ObservableValue<String>>() {
 		    @Override
 		    public ObservableValue<String> call(
@@ -129,6 +127,7 @@ public class MainWindowController implements Initializable {
 		    }
 		);
 		
+		// Bind Category
 		tcCategory.setCellValueFactory(new Callback<CellDataFeatures<Lot, String>, ObservableValue<String>>() {
 		    @Override
 		    public ObservableValue<String> call(
@@ -138,6 +137,8 @@ public class MainWindowController implements Initializable {
 		    }
 		);
 		
+		
+		// When its selected, load the detailed panel of the bids
 		lotsTable.getSelectionModel().selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
             //Check whether item is selected and set value of selected item to Label
             if (lotsTable.getSelectionModel().getSelectedItem() != null) {
@@ -148,12 +149,17 @@ public class MainWindowController implements Initializable {
 		
 	}
 	
+	public void loadDetailedLotPane(Lot t) {
+		
+	}
+	
 	public void fillTable() {
 		LotService ls = new JavaSpacesLotService();
 		
 		final ObservableList<Lot> data = FXCollections.observableArrayList(
 		    ls.getAllLots()
 		);
+		
 		if(lotsTable != null) {
 			lotsTable.setItems(data);
 			
@@ -181,6 +187,9 @@ public class MainWindowController implements Initializable {
 	private void loadAddLotForm(Category category) {
 		switch(category.getCode()) {
 		case "COLLECTABLES":
+			if(createGenericLotController == null) {
+				System.out.println("controller was null");
+			}
 			createLotPane.setCenter(createGenericLotController.view);
 			break;
 		case "ELECTRONICS":
@@ -211,7 +220,8 @@ public class MainWindowController implements Initializable {
 			
 			// Load generic controller
 			p = fxmlLoader.load(getClass().getResource("CreateGenericLot.fxml").openStream());
-			createGenericLotController = (CreateGenericLotController) fxmlLoader.getController();
+			
+			this.createGenericLotController = (CreateGenericLotController) fxmlLoader.getController();
 			
 			
 		} catch (IOException e) {

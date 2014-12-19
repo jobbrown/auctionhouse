@@ -109,6 +109,13 @@ public class CreateGenericLotController implements Initializable  {
 			// Set the category
 			newLot.category = Category.OTHER;
 			
+			// Set the price
+			if(lotStartingPrice.getText() != null && lotStartingPrice.getText().length() > 0) {
+				newLot.price = Double.parseDouble(lotStartingPrice.getText()); 
+			} else {
+				newLot.price = 0.01;
+			}
+			
 			LotService ls = new JavaSpacesLotService();
 			
 			if(ls.addLot(newLot)) {
