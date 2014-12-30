@@ -23,9 +23,14 @@ import javafx.scene.layout.Pane;
 import javafx.util.Callback;
 
 import com.jobbrown.auction_room.enums.Category;
+import com.jobbrown.auction_room.helpers.BidList;
 import com.jobbrown.auction_room.helpers.JavaSpacesLotService;
+import com.jobbrown.auction_room.helpers.JavaSpacesUserService;
 import com.jobbrown.auction_room.interfaces.helpers.LotService;
+import com.jobbrown.auction_room.interfaces.helpers.UserService;
+import com.jobbrown.auction_room.models.Bid;
 import com.jobbrown.auction_room.models.Lot;
+import com.jobbrown.auction_room.models.User;
 
 public class MainWindowController implements Initializable {
 	// View Lots Tab
@@ -37,15 +42,22 @@ public class MainWindowController implements Initializable {
 	@FXML public TableColumn<Lot, String> tcEndTime;
 	@FXML public TableColumn<Lot, String> tcPrice;
 	@FXML public TableColumn<Lot, String> tcCategory;
+	@FXML public TableColumn<Lot, String> tcHighestBid;
+	@FXML public TableColumn<Lot, String> tcLotSeller;
 	
 	@FXML public Button clearSearchSettingsButton;
 	@FXML public Button searchButton;
+	
+	@FXML public BorderPane viewLotPane;
 	
 	// Create Lot Tab
 	@FXML public ComboBox<Category> createLotLotType;
 	@FXML public BorderPane createLotPane;
 	
+	public Pane p = new Pane();
+	
 	private CreateGenericLotController createGenericLotController;
+	private ViewGenericLotController viewGenericLotController;
 	
 	
 	// My Account Tab
@@ -137,6 +149,34 @@ public class MainWindowController implements Initializable {
 		    }
 		);
 		
+		// Get highest bid
+		tcHighestBid.setCellValueFactory(new Callback<CellDataFeatures<Lot, String>, ObservableValue<String>>() {
+		    @Override
+		    public ObservableValue<String> call(
+		    	CellDataFeatures<Lot, String> c) {
+			    	BidList bl = new BidList(c.getValue().bids);
+			    	Bid bid = bl.sortByLargestBid().onlyPublic().one();
+			    	
+			    	if(bid == null) {
+			    		return new SimpleStringProperty("No public bids yet.");
+			    	} else {
+			    		return new SimpleStringProperty(bid.toString());
+			    	}
+		    	}
+		    }
+		);
+		
+		tcLotSeller.setCellValueFactory(new Callback<CellDataFeatures<Lot, String>, ObservableValue<String>>() {
+		    @Override
+		    public ObservableValue<String> call(
+		    	CellDataFeatures<Lot, String> c) {
+		    	UserService us = JavaSpacesUserService.getInstance();
+		    	User owner = us.getUserByID(c.getValue().seller);
+		    		return new SimpleStringProperty(owner.username);
+		     	}
+		    }
+		);
+		
 		
 		// When its selected, load the detailed panel of the bids
 		lotsTable.getSelectionModel().selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
@@ -145,12 +185,34 @@ public class MainWindowController implements Initializable {
             	this.loadDetailedLotPane(newValue);
             }
         });
-		fillTable();
 		
+		fillTable();
 	}
 	
-	public void loadDetailedLotPane(Lot t) {
+	public void loadDetailedLotPane(Lot t) {		
+		switch(t.category.getCode()) {
+		case "COLLECTABLES":
+			viewLotPane.setCenter(viewGenericLotController.view);
+			break;
+		case "ELECTRONICS":
+			viewLotPane.setCenter(viewGenericLotController.view);
+			break;
+		case "MOTORING":
+			viewLotPane.setCenter(viewGenericLotController.view);
+			break;
+		case "OTHER":
+			viewLotPane.setCenter(viewGenericLotController.view);
+			break;
+		default:
+			viewLotPane.setCenter(createGenericLotController.view);
+			break;
+		}
 		
+		if(viewGenericLotController == null) {
+			System.out.println("viewgenericlotcontroller is null");
+		} else {
+			viewGenericLotController.loadLot(t);
+		}
 	}
 	
 	public void fillTable() {
@@ -187,9 +249,6 @@ public class MainWindowController implements Initializable {
 	private void loadAddLotForm(Category category) {
 		switch(category.getCode()) {
 		case "COLLECTABLES":
-			if(createGenericLotController == null) {
-				System.out.println("controller was null");
-			}
 			createLotPane.setCenter(createGenericLotController.view);
 			break;
 		case "ELECTRONICS":
@@ -212,19 +271,35 @@ public class MainWindowController implements Initializable {
 	 * Preloads the controllers we might need for each lot type
 	 */
 	private void preloadControllers() {
-		FXMLLoader fxmlLoader = new FXMLLoader();
+		FXMLLoader fxmlLoader = null;
 		
 		Pane p = null;
 		
 		try {
+			// VIEW Controllers
 			
-			// Load generic controller
+			//FXMLLoader loader = new FXMLLoader();
+	        //loader.setLocation(MainApp.class.getResource("view/RootLayout.fxml"));
+	        //rootLayout = (BorderPane) loader.load();
+			
+			fxmlLoader = new FXMLLoader();
+			fxmlLoader.setLocation(MainWindowController.class.getResource("ViewGenericLot.fxml"));
+			p = fxmlLoader.load();
+			this.viewGenericLotController = (ViewGenericLotController) fxmlLoader.getController();
+			
+			//p = fxmlLoader.load(getClass().getResource("ViewGenericLot.fxml").openStream());
+			//this.viewGenericLotController = (ViewGenericLotController) fxmlLoader.getController();
+			
+			fxmlLoader = new FXMLLoader();
+			
+			// CREATE Controllers
 			p = fxmlLoader.load(getClass().getResource("CreateGenericLot.fxml").openStream());
-			
 			this.createGenericLotController = (CreateGenericLotController) fxmlLoader.getController();
 			
 			
 		} catch (IOException e) {
+			System.out.println("Caught exception");
+			e.printStackTrace();
 		}
 		
 	}

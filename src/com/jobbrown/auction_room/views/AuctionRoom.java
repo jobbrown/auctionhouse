@@ -76,13 +76,13 @@ public class AuctionRoom extends Application {
 		}
     	
     	// Create a few hacky bids
-    	Bid bid1 = new Bid(true, 100.00, 1, new Date());
-    	Bid bid2 = new Bid(true, 99.99, 2, new Date());
-    	Bid bid3 = new Bid(false, 150.00, 3, new Date());
+    	//Bid bid1 = new Bid(true, 100.00, 1, new Date());
+    	//Bid bid2 = new Bid(true, 99.99, 2, new Date());
+    	//Bid bid3 = new Bid(false, 150.00, 3, new Date());
     	
-    	ls.addBidToLot(receivedLot, bid1);
-    	ls.addBidToLot(receivedLot, bid2);
-    	ls.addBidToLot(receivedLot, bid3);
+    	//ls.addBidToLot(receivedLot, bid1);
+    	//ls.addBidToLot(receivedLot, bid2);
+    	//ls.addBidToLot(receivedLot, bid3);
     	
     	// Get it back again
     	lot = new Lot();

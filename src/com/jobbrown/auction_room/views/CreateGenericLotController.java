@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.ResourceBundle;
 
+import org.controlsfx.dialog.Dialogs;
+
 import com.jobbrown.auction_room.enums.Category;
 import com.jobbrown.auction_room.helpers.JavaSpacesLotService;
 import com.jobbrown.auction_room.helpers.JavaSpacesUserService;
@@ -73,6 +75,10 @@ public class CreateGenericLotController implements Initializable  {
 			Double parsedStartingPrice = null;
 			try {
 				parsedStartingPrice = Double.parseDouble(lotStartingPrice.getText());	
+				
+				if(parsedStartingPrice < 0) {
+					errors.add("Starting price should be greater than 0");
+				}
 			} catch (NumberFormatException e) {
 				errors.add("That starting price was not a recognised format");
 			}
@@ -84,6 +90,7 @@ public class CreateGenericLotController implements Initializable  {
 	/**
 	 * Event for when submit button of create lot form is clicked
 	 */
+	@SuppressWarnings("deprecation")
 	public void submitButtonClicked() {
 		if(this.isValid()) {
 			// Lets try and create that lot
@@ -119,16 +126,34 @@ public class CreateGenericLotController implements Initializable  {
 			LotService ls = new JavaSpacesLotService();
 			
 			if(ls.addLot(newLot)) {
-				System.out.println("Success");
+				Dialogs.create()
+				.owner(view)
+				.masthead("Success")
+				.message("That lot has been added to the system. TODO notify and change tab")
+				.showInformation();
 			} else {
-				System.out.println("Failed to add that lot. Replace with popup error.");
+				Dialogs.create()
+				.owner(view)
+				.masthead("Error")
+				.message("Failed to add to space. Unknown reason.")
+				.showError();
 			}
 			
 		} else {
-			// Display errors
-			for(String error : this.getValidationErrors()) {
-				System.out.println(error);
-			}
+			Dialogs.create()
+			.owner(view)
+			.masthead("Validation Error")
+			.message(this.buildErrorString(this.getValidationErrors()))
+			.showError();
+			
 		}
+	}
+	
+	private String buildErrorString(ArrayList<String> errors) {
+		String builtString = "";
+		for(String s : errors)  {
+			builtString = builtString + s + "\n\n";
+		}
+		return builtString;
 	}
 }

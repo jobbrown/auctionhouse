@@ -54,6 +54,8 @@ public interface UserService {
      */
     public User searchForUser(User u) throws UserNotFoundException;
     
+    public User getUserByID(Integer id);
+    
     /**
      * Checks if a username is unused by any other user
      * @param username

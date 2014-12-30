@@ -8,23 +8,29 @@ import com.jobbrown.auction_room.models.Bid;
 
 
 public class BidList {
-	private ArrayList<Bid> bidList = null;
+	private ArrayList<Bid> bidList = new ArrayList<Bid>();
 	
 	public BidList(ArrayList<Bid> bids) {
-		this.bidList = bids;
+		if(bids == null) {
+			this.bidList = new ArrayList<Bid>();
+		} else {
+			this.bidList = bids;
+		}
 	}
 	
 	public ArrayList<Bid> get() {
+		if(this.count() == 0) {
+			return null;
+		}
 		return this.bidList;
 	}
 	
-	/*
-	 * Fields 
-	 * publicBid (bool)
-	 * bidder (int)
-	 * date (Date)
-	 * amoutn double
-	 */
+	public Bid one() {
+		if(this.count() == 0) {
+			return null;
+		}
+		return this.bidList.get(0);
+	}
 	
 	public BidList sortBySmallestBid() {
 		ArrayList<Bid> bidCopy = new ArrayList<Bid>(bidList);
@@ -93,8 +99,11 @@ public class BidList {
 	public BidList onlyPublic() {
 		ArrayList<Bid> newBidList = new ArrayList<Bid>();
 		
+		JavaSpacesUserService us = JavaSpacesUserService.getInstance();
+		
+		// Go through all the bids, only pull out public or the active users bids
 		for(Bid bid : bidList) {
-			if(bid.publicBid) {
+			if(bid.publicBid || us.getCurrentUser().id.equals(bid.bidder.id)) {
 				newBidList.add(bid);
 			}
 		}

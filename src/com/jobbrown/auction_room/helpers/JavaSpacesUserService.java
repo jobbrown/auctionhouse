@@ -36,7 +36,7 @@ public class JavaSpacesUserService implements UserService {
     }
     
     private JavaSpacesUserService() { 
-    	this.space = SpaceUtils.getSpace(); 
+    	this.space = SpaceUtils.getSpace();
     }
 
     
@@ -125,6 +125,26 @@ public class JavaSpacesUserService implements UserService {
         }
         
         return (user == null);
+    }
+    
+    /**
+     * Grab a user by ID
+     * @param id
+     * @return
+     */
+    public User getUserByID(Integer id) {
+    	User u = new User();
+    	u.id = id;
+    	
+    	User returnedUser = null;
+    	
+    	try {
+           returnedUser = this.searchForUser(u);
+        } catch (UserNotFoundException e) {
+            return null;
+        }
+
+        return returnedUser;
     }
 
     /**

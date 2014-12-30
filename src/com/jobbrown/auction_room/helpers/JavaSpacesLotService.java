@@ -71,8 +71,6 @@ public class JavaSpacesLotService implements LotService {
         	// Set the ID on the new lot
             t.id = tail.position;
         }
-        
-        System.out.println("Inserting with id " + tail.position);
 
         // Write the tail back
         try {
@@ -154,9 +152,7 @@ public class JavaSpacesLotService implements LotService {
     }
 
     
-    public Entry getLot(Lot t, Transaction transaction) {
-    	System.out.println("Searching for lot with ID " + t.id);
-    	
+    public Entry getLot(Lot t, Transaction transaction) {    	
 		// Take the ID from the Lot and create a fresh template
     	Lot searchLot = this.stripAllProperties(t);
     	
@@ -204,8 +200,9 @@ public class JavaSpacesLotService implements LotService {
      * @param t
      * @param b
      * @return
+     * @throws LotNotFoundException 
      */
-    public boolean addBidToLot(Lot t, Bid b) {
+    public boolean addBidToLot(Lot t, Bid b) throws LotNotFoundException {
     	// Create a transaction
     	TransactionService ts = new JavaSpacesTransactionService();
         Transaction transaction = ts.getTransaction();
@@ -231,7 +228,8 @@ public class JavaSpacesLotService implements LotService {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-    		return false;
+    		
+    		throw new LotNotFoundException();
     	}
     	
     	// Add the bid
@@ -247,6 +245,7 @@ public class JavaSpacesLotService implements LotService {
 				} catch (CannotAbortException e) {
 					System.err.println("Failed to abort");
 					e.printStackTrace();
+					throw new LotNotFoundException();
 				} finally {
 					return false;
 				}

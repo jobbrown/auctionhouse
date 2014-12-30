@@ -15,7 +15,7 @@ public class Bid implements Serializable {
 	public Double amount;
 	
 	// Who was it made by
-	public Integer bidder;
+	public User bidder;
 	
 	// When was this bid made
 	public Date date;
@@ -28,7 +28,7 @@ public class Bid implements Serializable {
     }
     
 
-    public Bid(Boolean publicBid, double amount, Integer bidder, Date date) {
+    public Bid(Boolean publicBid, double amount, User bidder, Date date) {
     	this.publicBid = publicBid;
     	this.amount = amount;
     	this.bidder = bidder;

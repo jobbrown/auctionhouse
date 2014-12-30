@@ -4,45 +4,54 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="917.0" prefWidth="1382.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jobbrown.auction_room.views.MainWindowController">
+<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1300.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jobbrown.auction_room.views.MainWindowController">
   <tabs>
     <Tab text="View Lots">
          <content>
-            <FlowPane prefHeight="200.0" prefWidth="200.0">
+            <AnchorPane prefHeight="1000.0" prefWidth="1400.0">
                <children>
-                  <VBox prefHeight="882.0" prefWidth="881.0">
+                  <HBox prefHeight="781.0" prefWidth="1300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <children>
-                        <ScrollPane prefHeight="653.0" prefWidth="642.0">
-                          <content>
-                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="650.0" prefWidth="1087.0">
-                                 <children>
-                                    <TableView fx:id="lotsTable" prefHeight="650.0" prefWidth="1038.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-398.0" AnchorPane.topAnchor="0.0">
-                                      <columns>
-                                        <TableColumn fx:id="tcID" prefWidth="48.0" text="ID" />
-                                        <TableColumn fx:id="tcTitle" prefWidth="204.0" text="Title" />
-                                          <TableColumn fx:id="tcDescription" prefWidth="211.0" text="Description" />
-                                          <TableColumn fx:id="tcEndTime" minWidth="0.0" prefWidth="93.0" text="End Time" />
-                                          <TableColumn fx:id="tcPrice" prefWidth="120.0" text="Price" />
-                                          <TableColumn fx:id="tcCategory" prefWidth="114.0" text="Category" />
-                                          <TableColumn fx:id="tcHighestBid" prefWidth="155.0" text="Current Highest Bid" />
-                                      </columns>
-                                    </TableView>
-                                 </children>
-                              </AnchorPane>
-                          </content>
-                        </ScrollPane>
-                        <Pane prefHeight="230.0" prefWidth="881.0">
+                     	<VBox prefHeight="767.0" prefWidth="822.0">
                            <children>
-                              <Label layoutX="14.0" layoutY="14.0" text="Searching Options" />
-                              <Button fx:id="searchButton" layoutX="754.0" layoutY="190.0" mnemonicParsing="false" onAction="#searchButtonClicked" text="Search / Reload" />
-                              <Button fx:id="clearSearchSettingsButton" layoutX="591.0" layoutY="190.0" mnemonicParsing="false" text="Reset Values to Default" />
+                              <ScrollPane prefHeight="653.0" prefWidth="642.0">
+                                <content>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="650.0" prefWidth="1087.0">
+                                       <children>
+                                          <TableView fx:id="lotsTable" prefHeight="650.0" prefWidth="1038.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-398.0" AnchorPane.topAnchor="0.0">
+                                            <columns>
+                                              <TableColumn fx:id="tcID" prefWidth="48.0" text="ID" />
+                                              <TableColumn fx:id="tcTitle" prefWidth="204.0" text="Title kek" />
+                                                <TableColumn fx:id="tcDescription" prefWidth="211.0" text="Description" />
+                                                <TableColumn fx:id="tcEndTime" minWidth="0.0" prefWidth="93.0" text="End Time" />
+                                                <TableColumn fx:id="tcPrice" prefWidth="120.0" text="Price" />
+                                                <TableColumn fx:id="tcCategory" prefWidth="114.0" text="Category" />
+                                                <TableColumn fx:id="tcHighestBid" prefWidth="155.0" text="Current Highest Bid" />
+                                                <TableColumn fx:id="tcLotSeller" prefWidth="75.0" text="Lot Seller" />
+                                            </columns>
+                                          </TableView>
+                                       </children>
+                                    </AnchorPane>
+                                </content>
+                              </ScrollPane>
+                              <Pane prefHeight="230.0" prefWidth="881.0">
+                                 <children>
+                                    <Label layoutX="14.0" layoutY="14.0" text="Searching Options" />
+                                    <Button fx:id="searchButton" layoutX="188.0" layoutY="132.0" mnemonicParsing="false" onAction="#searchButtonClicked" text="Search / Reload" />
+                                    <Button fx:id="clearSearchSettingsButton" cancelButton="true" layoutX="14.0" layoutY="132.0" mnemonicParsing="false" text="Reset Values to Default" />
+                                 </children>
+                              </Pane>
                            </children>
-                        </Pane>
+                        </VBox>
+                        <AnchorPane prefHeight="767.0" prefWidth="477.0">
+                           <children>
+                           	<BorderPane fx:id="viewLotPane" layoutX="348.0" layoutY="82.0" prefHeight="767.0" prefWidth="477.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" HBox.hgrow="ALWAYS" />
+                           </children>
+                        </AnchorPane>
                      </children>
-                  </VBox>
-                  <AnchorPane prefHeight="882.0" prefWidth="482.0" />
+                  </HBox>
                </children>
-            </FlowPane>
+            </AnchorPane>
          </content>
     </Tab>
       <Tab text="Create Lot">
