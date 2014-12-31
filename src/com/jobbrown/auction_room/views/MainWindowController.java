@@ -6,6 +6,8 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ResourceBundle;
 
+import org.controlsfx.dialog.Dialogs;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -15,6 +17,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
@@ -26,6 +29,7 @@ import com.jobbrown.auction_room.enums.Category;
 import com.jobbrown.auction_room.helpers.BidList;
 import com.jobbrown.auction_room.helpers.JavaSpacesLotService;
 import com.jobbrown.auction_room.helpers.JavaSpacesUserService;
+import com.jobbrown.auction_room.helpers.LotList;
 import com.jobbrown.auction_room.interfaces.helpers.LotService;
 import com.jobbrown.auction_room.interfaces.helpers.UserService;
 import com.jobbrown.auction_room.models.Bid;
@@ -33,6 +37,9 @@ import com.jobbrown.auction_room.models.Lot;
 import com.jobbrown.auction_room.models.User;
 
 public class MainWindowController implements Initializable {
+	// Main Window
+	@FXML public TabPane tabPane;
+	
 	// View Lots Tab
 	@FXML public TableView<Lot> lotsTable;
 	
@@ -54,8 +61,7 @@ public class MainWindowController implements Initializable {
 	@FXML public ComboBox<Category> createLotLotType;
 	@FXML public BorderPane createLotPane;
 	
-	public Pane p = new Pane();
-	
+	// Controllers
 	private CreateGenericLotController createGenericLotController;
 	private ViewGenericLotController viewGenericLotController;
 	
@@ -84,7 +90,7 @@ public class MainWindowController implements Initializable {
 		fillTable();
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "deprecation" })
 	public void preloadTable() {
 		// Bind "id" to tcID
 		
@@ -182,7 +188,25 @@ public class MainWindowController implements Initializable {
 		lotsTable.getSelectionModel().selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
             //Check whether item is selected and set value of selected item to Label
             if (lotsTable.getSelectionModel().getSelectedItem() != null) {
-            	this.loadDetailedLotPane(newValue);
+            	// Load it from the space and display it
+            	JavaSpacesLotService ls = new JavaSpacesLotService();
+            	
+            	Lot returnedLot = null;
+            	try {
+					returnedLot = (Lot) ls.searchForLot(newValue);
+				} catch (Exception e) {
+					Dialogs.create()
+						.owner(tabPane)
+						.masthead("Error")
+						.message("That auction has been removed from sale.")
+						.showError();
+					
+					this.searchButtonClicked();
+				}
+            	
+            	if(returnedLot != null) {
+            		this.loadDetailedLotPane(returnedLot);
+            	}
             }
         });
 		
@@ -219,7 +243,7 @@ public class MainWindowController implements Initializable {
 		LotService ls = new JavaSpacesLotService();
 		
 		final ObservableList<Lot> data = FXCollections.observableArrayList(
-		    ls.getAllLots()
+		    new LotList().active().all()
 		);
 		
 		if(lotsTable != null) {
@@ -286,6 +310,7 @@ public class MainWindowController implements Initializable {
 			fxmlLoader.setLocation(MainWindowController.class.getResource("ViewGenericLot.fxml"));
 			p = fxmlLoader.load();
 			this.viewGenericLotController = (ViewGenericLotController) fxmlLoader.getController();
+			this.viewGenericLotController.parent = this;
 			
 			//p = fxmlLoader.load(getClass().getResource("ViewGenericLot.fxml").openStream());
 			//this.viewGenericLotController = (ViewGenericLotController) fxmlLoader.getController();
@@ -295,7 +320,7 @@ public class MainWindowController implements Initializable {
 			// CREATE Controllers
 			p = fxmlLoader.load(getClass().getResource("CreateGenericLot.fxml").openStream());
 			this.createGenericLotController = (CreateGenericLotController) fxmlLoader.getController();
-			
+			this.createGenericLotController.parent = this;
 			
 		} catch (IOException e) {
 			System.out.println("Caught exception");

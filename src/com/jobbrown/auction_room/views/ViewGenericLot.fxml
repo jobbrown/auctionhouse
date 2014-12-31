@@ -131,7 +131,7 @@
                </GridPane.margin>
                <children>
                   <Button fx:id="addBidButton" mnemonicParsing="false" onAction="#addBidButtonClicked" text="Add Bid" />
-                  <Button fx:id="ownerOptionsButton" mnemonicParsing="false" text="Owner Options">
+                  <Button fx:id="ownerOptionsButton" mnemonicParsing="false" onAction="#ownerOptionsButtonClicked" text="Owner Options">
                      <HBox.margin>
                         <Insets left="50.0" />
                      </HBox.margin>

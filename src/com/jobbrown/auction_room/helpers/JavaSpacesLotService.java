@@ -1,5 +1,6 @@
 package com.jobbrown.auction_room.helpers;
 
+import com.jobbrown.auction_room.exceptions.LotNotActiveException;
 import com.jobbrown.auction_room.exceptions.LotNotFoundException;
 import com.jobbrown.auction_room.interfaces.helpers.LotService;
 import com.jobbrown.auction_room.interfaces.helpers.TransactionService;
@@ -97,7 +98,6 @@ public class JavaSpacesLotService implements LotService {
      *
      * @return ArrayList<Lot> all lots in the space
      */
-    @Override
 	public ArrayList<Lot> getAllLots() {
         ArrayList<Lot> returnable = new ArrayList<Lot>();
 
@@ -171,7 +171,6 @@ public class JavaSpacesLotService implements LotService {
     	
     }
  
-    
     /**
      * Updates a lot on the JavaSpace, the old one is removed by ID then replaced with this
      * @param t
@@ -201,8 +200,9 @@ public class JavaSpacesLotService implements LotService {
      * @param b
      * @return
      * @throws LotNotFoundException 
+     * @throws LotNotActiveException 
      */
-    public boolean addBidToLot(Lot t, Bid b) throws LotNotFoundException {
+    public boolean addBidToLot(Lot t, Bid b) throws LotNotFoundException, LotNotActiveException {
     	// Create a transaction
     	TransactionService ts = new JavaSpacesTransactionService();
         Transaction transaction = ts.getTransaction();
@@ -232,28 +232,34 @@ public class JavaSpacesLotService implements LotService {
     		throw new LotNotFoundException();
     	}
     	
-    	// Add the bid
-    	lot.addBidToLot(b);
+    	if(!lot.active) {
+    		throw new LotNotActiveException();
+    	} else {
+    		// Add the bid
+        	lot.addBidToLot(b);
+        	
+    		try {
+    			if(this.updateLot(lot)) {
+    				transaction.commit();
+    				return true;
+    			} else {
+    				try {
+    					transaction.abort();
+    				} catch (CannotAbortException e) {
+    					System.err.println("Failed to abort");
+    					e.printStackTrace();
+    					throw new LotNotFoundException();
+    				} finally {
+    					return false;
+    				}
+    			}
+    		} catch (UnknownTransactionException | CannotCommitException | RemoteException e) {
+    			System.err.println("Failed");
+    			return false;
+    		}
+    	}
     	
-		try {
-			if(this.updateLot(lot)) {
-				transaction.commit();
-				return true;
-			} else {
-				try {
-					transaction.abort();
-				} catch (CannotAbortException e) {
-					System.err.println("Failed to abort");
-					e.printStackTrace();
-					throw new LotNotFoundException();
-				} finally {
-					return false;
-				}
-			}
-		} catch (UnknownTransactionException | CannotCommitException | RemoteException e) {
-			System.err.println("Failed");
-			return false;
-		}
+    	
     }
     
     

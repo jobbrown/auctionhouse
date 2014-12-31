@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import org.controlsfx.control.PopOver;
+import org.controlsfx.dialog.Dialogs;
 
 import com.jobbrown.auction_room.helpers.BidList;
 import com.jobbrown.auction_room.helpers.JavaSpacesUserService;
@@ -34,6 +35,7 @@ import javafx.util.Callback;
 
 public class ViewGenericLotController implements Initializable  {
 	public Lot lot = null;
+	public MainWindowController parent = null;
 	
 	@FXML public AnchorPane view;
 	@FXML public Label lotName;
@@ -51,15 +53,40 @@ public class ViewGenericLotController implements Initializable  {
 	@FXML public Button addBidButton;
 	@FXML public Button ownerOptionsButton;
 	
+	/**
+	 * This function will be called while the GUI is initializing.
+	 */
 	public void preload() {
 		this.preloadTable();
 	}
 	
+	/**
+	 * This will accept a Lot t and set it to the local class variable of 'lot'
+	 * It will then call private function loadLot which takes care of loading the
+	 * lots params into the field params. 
+	 * @param t The lot to be loaded into the GUI
+	 */
+	@SuppressWarnings("deprecation")
 	public void loadLot(Lot t) {
-		this.lot = t;
-		this.loadLot();
+		if(!t.active) {
+			Dialogs.create()
+				.owner(view)
+				.masthead("Error")
+				.message("That auction has been removed from sale.")
+				.showError();
+			
+			this.parent.searchButtonClicked();
+		} else {
+			this.lot = t;
+			this.loadLot();
+		}
 	}
 	
+	/**
+	 * This allows a class variable of 'lot' has been set containing the lot
+	 * which should laoded. It will take the properties from there and then
+	 * populate the form field using its data.
+	 */
 	private void loadLot() {
 		// Title of the lot
 		this.lotName.setText(this.lot.title);
@@ -115,9 +142,6 @@ public class ViewGenericLotController implements Initializable  {
 						new ArrayList<Bid>()
 				);
 			}
-			
-			
-			System.out.println(data.size());
 				
 			bidsTable.setItems(data);
 		}
@@ -130,10 +154,13 @@ public class ViewGenericLotController implements Initializable  {
 		this.endingTime.setText(dateFormat.format(this.lot.endTime));
 		
 		// Owner button
-		System.out.println("Im here");
 		this.prepareOwnerButton();
 	}
 	
+	/**
+	 * This method takes care of preparing the table to be viewed. It binds each column
+	 * to a property of the Bid class so that Bids can be displayed on the table. 
+	 */
 	@SuppressWarnings("unchecked")
 	private void preloadTable() {
 		
@@ -166,6 +193,10 @@ public class ViewGenericLotController implements Initializable  {
 		);
 	}
 	
+	/**
+	 * This is fired when the add button is clicked. It loads the FXML of AddBid.fxml and then
+	 * loads it into a popover which is displayed to the user.
+	 */
 	public void addBidButtonClicked() {		
 		FXMLLoader fxmlLoader = null;
 		AddBidController abc = null;
@@ -193,10 +224,41 @@ public class ViewGenericLotController implements Initializable  {
 		po.show(this.view);
 	}
 	
+	/**
+	 * This is fired when the owner options button is clicked. It takes care of loading the FXML
+	 * of "LotOwnerOptions.fxml" and displaying it in a popover. 
+	 */
 	public void ownerOptionsButtonClicked() {
-		System.out.println("Clicked");
+		FXMLLoader fxmlLoader = null;
+		LotOwnerOptionsController looc = null;
+		Pane p = null;
+		
+		try {
+			fxmlLoader = new FXMLLoader();
+			
+			fxmlLoader.setLocation(ViewGenericLotController.class.getResource("LotOwnerOptions.fxml"));
+			p = fxmlLoader.load();
+			
+			looc = (LotOwnerOptionsController) fxmlLoader.getController();
+			
+			looc.setLot(this.lot);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		PopOver po = new PopOver((Node) p);
+		
+		looc.po = po;
+		
+		po.setDetached(true);
+		po.setDetachedTitle("Owner options of: " + this.lot.title);
+		po.show(this.view);
 	}
 	
+	/*
+	 * This function is used to determine whether the owner options button should be displayed
+	 * for the user or not (dependent on if they created it).
+	 */
 	public void prepareOwnerButton() {
 		UserService us = JavaSpacesUserService.getInstance();
 		User lotSeller = us.getUserByID(this.lot.seller);
@@ -208,6 +270,10 @@ public class ViewGenericLotController implements Initializable  {
 		}
 	}
 	
+	/**
+	 * Default initialize function provided by the Initializable interface. Called as soon
+	 * as the view is created.
+	 */
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		this.preload();

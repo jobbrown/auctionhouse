@@ -8,6 +8,7 @@ import java.util.ResourceBundle;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.dialog.Dialogs;
 
+import com.jobbrown.auction_room.exceptions.LotNotActiveException;
 import com.jobbrown.auction_room.exceptions.LotNotFoundException;
 import com.jobbrown.auction_room.helpers.JavaSpacesLotService;
 import com.jobbrown.auction_room.helpers.JavaSpacesUserService;
@@ -37,12 +38,21 @@ public class AddBidController implements Initializable {
 	@FXML public Button addBidButton;
 	
 	
-	
-	
-	
 	public void setLot(Lot t) {
-		this.lot = t;
-		this.loadLot();
+		// Reload it from the space
+		JavaSpacesLotService ls = new JavaSpacesLotService();
+		
+		Lot returnedLot = null;
+		try {
+			returnedLot = (Lot) ls.searchForLot(t);
+		} catch (LotNotFoundException e) {
+			System.out.println("Unexpected error in AddBidController");
+		}
+		
+		if(returnedLot != null) {
+			this.lot = returnedLot;
+			this.loadLot();
+		}
 	}
 	
 	public void loadLot() {
@@ -65,6 +75,7 @@ public class AddBidController implements Initializable {
 			.showError();
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void addButtonClicked() {
 		if(!this.isValid()) {
 			this.displayErrors();
@@ -93,14 +104,34 @@ public class AddBidController implements Initializable {
 			}
 			
 			try {
-				ls.addBidToLot(this.lot, newBid);
+				if(ls.addBidToLot(this.lot, newBid)) {
+					Dialogs.create()
+						.owner(this.popover)
+						.title("Success")
+						.message("That bid has been added")
+						.showInformation();
+				
+					this.popover.hide();
+				} else {
+					Dialogs.create()
+						.owner(this.popover)
+						.title("Error")
+						.masthead("Error")
+						.message("Failed to add bid to lot")
+						.showError();
+					
+					this.popover.hide();
+				}
 			} catch (LotNotFoundException e) {
 				System.out.println("LotNotFound exception");
+			} catch (LotNotActiveException e1) {
+				Dialogs.create()
+					.owner(this.popover)
+					.title("Error")
+					.masthead("Error")
+					.message("That lot is no longer active so your bid couldn't be placed.")
+					.showError();
 			}
-			
-			
-
-			System.out.println("Looks like its valid");
 		}
 	}
 	

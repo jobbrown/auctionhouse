@@ -17,13 +17,16 @@ import com.jobbrown.auction_room.models.Lot;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.Slider;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 
 public class CreateGenericLotController implements Initializable  {
-
+	public MainWindowController parent = null;
+	
 	@FXML public GridPane view;
 	@FXML public TextField lotTitle;
 	@FXML public TextArea lotDescription;
@@ -102,6 +105,9 @@ public class CreateGenericLotController implements Initializable  {
 			// Set the description
 			newLot.description = lotDescription.getText();
 			
+			// Make sure its active
+			newLot.active = true;
+			
 			// Set the start time to NOW
 			newLot.startTime = new Date();
 			
@@ -129,8 +135,14 @@ public class CreateGenericLotController implements Initializable  {
 				Dialogs.create()
 				.owner(view)
 				.masthead("Success")
-				.message("That lot has been added to the system. TODO notify and change tab")
+				.message("That lot has been added to the system.")
 				.showInformation();
+				
+				parent.searchButtonClicked();
+				
+				SingleSelectionModel<Tab> selectionModel = parent.tabPane.getSelectionModel();
+				selectionModel.select(0);
+				
 			} else {
 				Dialogs.create()
 				.owner(view)

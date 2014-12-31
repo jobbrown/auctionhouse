@@ -1,7 +1,9 @@
 package com.jobbrown.auction_room.helpers;
 
+import com.jobbrown.auction_room.models.Bid;
 import com.jobbrown.auction_room.models.Lot;
 import com.jobbrown.auction_room.thirdparty.gallen.SpaceUtils;
+
 import net.jini.core.lease.LeaseDeniedException;
 import net.jini.core.transaction.Transaction;
 import net.jini.core.transaction.TransactionFactory;
@@ -24,37 +26,23 @@ import java.util.ArrayList;
  */
 
 public class LotList {
-    private ArrayList<Lot> list = new ArrayList<Lot>();
-    private JavaSpace space;
+    private ArrayList<Lot> lotList = new ArrayList<Lot>();
 
     /**
-     * Empty constructor. Presets the space.
+     * Empty constructor. Load all the lots in
      */
     public LotList() {
-        space = SpaceUtils.getSpace();
+    	JavaSpacesLotService ls = new JavaSpacesLotService();
+    	this.lotList = ls.getAllLots();
     }
-
+    
     /**
      * Constructor with preexisting list of Lots (for sub searches). Presets the space.
      *
      * @param list The list of obcts to prepopulate the LotList with
      */
     public LotList(ArrayList<Lot> list) {
-        space = SpaceUtils.getSpace();
-        this.list = list;
-    }
-
-    /**
-     *
-     * @return LotList a LotList object with internal list set to all lots in the space
-     */
-    public LotList all() {
-        // Create a Lot template
-        Lot template = new Lot();
-
-        // Do the search on the space
-
-        return new LotList();
+        this.lotList = list;
     }
 
     /**
@@ -62,18 +50,37 @@ public class LotList {
      *
      * @return ArrayList all Items in this search
      */
-    public ArrayList<Lot> getItems() {
-        return this.list;
+    public ArrayList<Lot> all() {
+        return this.lotList;
     }
 
-    public LotList withID(int ID) {
-        return new LotList();
-    }
-
-    private Transaction createTransaction() throws RemoteException, LeaseDeniedException {
-        Transaction.Created trc = TransactionFactory.create(SpaceUtils.getManager(), 3000);
-        Transaction txn = trc.transaction;
-
-        return txn;
-    }
+	public LotList active() {
+		ArrayList<Lot> newLotList = new ArrayList<Lot>();
+		
+		// Go through all the bids, only pull out public or the active users bids
+		for(Lot lot : lotList) {
+			if(lot != null) {
+				if(lot.active == true) {
+					newLotList.add(lot);
+				}
+			}
+		}
+		
+		return new LotList(newLotList);
+	}
+	
+	public LotList ended() {
+		ArrayList<Lot> newLotList = new ArrayList<Lot>();
+		
+		// Go through all the bids, only pull out public or the active users bids
+		for(Lot lot : lotList) {
+			if(lot != null) {
+				if(!lot.active == false) {
+					newLotList.add(lot);
+				}
+			}
+		}
+		
+		return new LotList(newLotList);
+	}
 }

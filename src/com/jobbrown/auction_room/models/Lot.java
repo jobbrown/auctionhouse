@@ -22,6 +22,8 @@ public class Lot implements Entry
     public Integer seller;
     public Double price;
     public ArrayList<Bid> bids;
+    public Boolean active;
+    public Bid winningBid;
     public Category category;
 
     /*
