@@ -139,10 +139,50 @@ public class LotOwnerOptionsController implements Initializable  {
 	public void saveChangedButtonClicked() {
 		// Write the changes onto the object
 		if(this.isValid()) {
-			// Save the changes
+			// Load the helper
+			JavaSpacesLotService ls = new JavaSpacesLotService();
 			
-			// Close the popover
-			this.closePopover();
+			// Grab an updated copy of the lot
+			Lot returnedLot = null;
+			try {
+				returnedLot = (Lot) ls.searchForLot(this.lot);
+			} catch (LotNotFoundException e) {
+				System.out.println("This shouldnt happen hopefully");
+				Dialogs.create()
+					.owner(this.po)
+					.title("Error")
+					.message("An unexpected error occured, please try again")
+					.showError();
+			}
+			
+			if(returnedLot == null) {
+				Dialogs.create()
+					.owner(this.po)
+					.title("Error")
+					.message("An unexpected error occured, please try again")
+					.showError();
+			} else {
+				// Save the changes
+				returnedLot.title = this.lotNameField.getText();
+				returnedLot.description = this.lotDescription.getText();
+				
+				if(ls.updateLot(returnedLot)) {
+					Dialogs.create()
+						.owner(this.po)
+						.title("Success")
+						.message("That lot has been updated")
+						.showInformation();
+				} else {
+					Dialogs.create()
+					.owner(this.po)
+					.title("Error")
+					.message("An unexpected error occured, please try again 1")
+					.showError();
+				}
+				
+				// Close the popover
+				this.closePopover();
+			}			
 		} else {
 			Dialogs.create()
 				.owner(this.po)
