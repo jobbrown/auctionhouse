@@ -1,16 +1,7 @@
 package com.jobbrown.auction_room.helpers;
 
 import com.jobbrown.auction_room.enums.Category;
-import com.jobbrown.auction_room.models.Bid;
 import com.jobbrown.auction_room.models.Lot;
-import com.jobbrown.auction_room.thirdparty.gallen.SpaceUtils;
-
-import net.jini.core.lease.LeaseDeniedException;
-import net.jini.core.transaction.Transaction;
-import net.jini.core.transaction.TransactionFactory;
-import net.jini.space.JavaSpace;
-
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 /**
@@ -55,6 +46,11 @@ public class LotList {
         return this.lotList;
     }
 
+    /**
+     * Returns only the active lots from the list of lots
+     * 
+     * @return LotList
+     */
 	public LotList active() {
 		ArrayList<Lot> newLotList = new ArrayList<Lot>();
 		
@@ -70,6 +66,11 @@ public class LotList {
 		return new LotList(newLotList);
 	}
 	
+	/**
+	 * Returns only the ended lots from the list of lots
+	 * 
+	 * @return LotList
+	 */
 	public LotList ended() {
 		ArrayList<Lot> newLotList = new ArrayList<Lot>();
 		
@@ -85,6 +86,12 @@ public class LotList {
 		return new LotList(newLotList);
 	}
 	
+	/**
+	 * Searches the LotList by lotName (exact or contains matches)
+	 * 
+	 * @param lotName the value to search by
+	 * @return LotList
+	 */
 	public LotList filterByLotName(String lotName) {
 		ArrayList<Lot> newLotList = new ArrayList<Lot>();
 		
@@ -100,6 +107,12 @@ public class LotList {
 		return new LotList(newLotList);
 	}
 	
+	/**
+	 * Searches the LotList by category
+	 * 
+	 * @param category the value to search by
+	 * @return LotList
+	 */
 	public LotList filterByLotCategory(Category category) {
 		ArrayList<Lot> newLotList = new ArrayList<Lot>();
 		

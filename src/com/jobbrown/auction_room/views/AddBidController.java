@@ -12,8 +12,6 @@ import com.jobbrown.auction_room.exceptions.LotNotActiveException;
 import com.jobbrown.auction_room.exceptions.LotNotFoundException;
 import com.jobbrown.auction_room.helpers.JavaSpacesLotService;
 import com.jobbrown.auction_room.helpers.JavaSpacesUserService;
-import com.jobbrown.auction_room.interfaces.helpers.LotService;
-import com.jobbrown.auction_room.interfaces.helpers.UserService;
 import com.jobbrown.auction_room.models.Bid;
 import com.jobbrown.auction_room.models.Lot;
 
@@ -24,10 +22,17 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.text.Text;
 
+@SuppressWarnings("deprecation")
 public class AddBidController implements Initializable {
+	/**
+	 * Contains a reference to the lot which view is representing
+	 */
 	public Lot lot = null;
+	
+	/**
+	 * Contains a reference to the popover which this view is contained within
+	 */
 	public PopOver popover = null;
 	
 	@FXML public Label lotName;
@@ -37,7 +42,10 @@ public class AddBidController implements Initializable {
 	@FXML public Button cancelButton;
 	@FXML public Button addBidButton;
 	
-	
+	/**
+	 * Sets the lot that this view is representing. Reloads it form the space, just to ensure its up to date. 
+	 * @param t the lot
+	 */
 	public void setLot(Lot t) {
 		// Reload it from the space
 		JavaSpacesLotService ls = new JavaSpacesLotService();
@@ -55,14 +63,24 @@ public class AddBidController implements Initializable {
 		}
 	}
 	
+	/**
+	 * After a lot has been set, load the relevent variables onto the view
+	 */
 	public void loadLot() {
 		this.lotName.setText(this.lot.title);
 	}
 	
+	/**
+	 * This is fired when the cancel button is clicked. Simply hide the popover we're contained
+	 * within.
+	 */
 	public void cancelButtonClicked() {
 		popover.hide();
 	}
 	
+	/**
+	 * This method takes care of displaying the errors in a nice dialog.
+	 */
 	@SuppressWarnings("deprecation")
 	public void displayErrors() {
 		ArrayList<String> errors = this.getValidationErrors();
@@ -75,6 +93,10 @@ public class AddBidController implements Initializable {
 			.showError();
 	}
 	
+	/**
+	 * This is fired when the add button is clicked. It creates the bid, then using the LotService helper to
+	 * add the bid to the lot. 
+	 */
 	@SuppressWarnings("deprecation")
 	public void addButtonClicked() {
 		if(!this.isValid()) {
@@ -135,6 +157,10 @@ public class AddBidController implements Initializable {
 		}
 	}
 	
+	/**
+	 * Looks at all the input fields and builds an arraylist of errors
+	 * @return ArrayList<String> all the errors
+	 */
 	public ArrayList<String> getValidationErrors() {
 		ArrayList<String> errors = new ArrayList<String>();
 		
@@ -160,6 +186,11 @@ public class AddBidController implements Initializable {
 		return errors;
 	}
 	
+	/**
+	 * Takes an arraylist of errors, and produces a concatenated String
+	 * @param errors all errors
+	 * @return String
+	 */
 	private String buildErrorString(ArrayList<String> errors) {
 		String builtString = "";
 		for(String s : errors)  {
@@ -168,10 +199,17 @@ public class AddBidController implements Initializable {
 		return builtString;
 	}
 	
+	/**
+	 * Returns whether the form is valid
+	 * @return boolean
+	 */
 	public boolean isValid() {
 		return this.getValidationErrors().size() == 0;
 	}
 	
+	/**
+	 * Initialize view elements
+	 */
 	private void initializeComboBox() {
 		ArrayList<String> opts = new ArrayList<String>();
 		
@@ -186,6 +224,9 @@ public class AddBidController implements Initializable {
 		
 	}
 
+	/**
+	 * Initialize view elements
+	 */
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		initializeComboBox();

@@ -4,7 +4,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
-
 import org.controlsfx.control.PopOver;
 import org.controlsfx.dialog.Dialogs;
 
@@ -19,8 +18,16 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
+@SuppressWarnings("deprecation")
 public class LotOwnerOptionsController implements Initializable  {
+	/**
+	 * This contains the lot which is being managed
+	 */
 	private Lot lot;
+	
+	/**
+	 * This contains a reference to the popover which we are contained within
+	 */
 	public PopOver po;
 	
 	@FXML public Label lotName;
@@ -29,27 +36,46 @@ public class LotOwnerOptionsController implements Initializable  {
 	@FXML public Button endBidNoWinner;
 	@FXML public Button endBidHighestBidder;
 	
+	/**
+	 * This method is automatically called when this controller is called when the view is initialized by JavaFX
+	 */
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		// TODO Auto-generated method stub
 		
 	}
 	
+	/**
+	 * Set the lot which should be used for this view.
+	 * @param t the lot
+	 */
 	public void setLot(Lot t) {
 		this.lot = t;
 		this.loadLot();
 	}
 	
+	/**
+	 * After a lot has been set, load the specific values out of the lot and display them
+	 */
 	public void loadLot() {
 		this.lotName.setText(this.lot.title);
 		this.lotNameField.setText(this.lot.title);
 		this.lotDescription.setText(this.lot.description);
 	}
 	
+	/**
+	 * Checks whether there are any validation errors on the form. Return boolean if the form is valid
+	 * @return are the entered values valid?
+	 */
 	public boolean isValid() {
 		return this.getValidationErrors().size() == 0;
 	}
 	
+	
+	/**
+	 * Check all the input fields on the form and see if there are any errors.
+	 * @return ArrayList of errors (or an arraylist of length 0 if there are none).
+	 */
 	public ArrayList<String> getValidationErrors() {
 		ArrayList<String> errors = new ArrayList<String>();
 		
@@ -66,6 +92,10 @@ public class LotOwnerOptionsController implements Initializable  {
 		return errors;
 	}
 	
+	/**
+	 * This method is fired when the end bid with no winner is selected.
+	 * It takes care of setting it as not active.
+	 */
 	@SuppressWarnings("deprecation")
 	public void endBidNoWinnerButtonClicked() {
 		JavaSpacesLotService ls = new JavaSpacesLotService();
@@ -108,6 +138,10 @@ public class LotOwnerOptionsController implements Initializable  {
 		}
 	}
 	
+	/**
+	 * This is fired when the End Lot and accept highest bidder button is clicked.
+	 * It will set it as no longer active, set the winning bid, and notify the winner. 
+	 */
 	@SuppressWarnings("deprecation")
 	public void endBidHighestBidderButtonClicked() {
 		// Get the lot
@@ -132,6 +166,9 @@ public class LotOwnerOptionsController implements Initializable  {
 		this.closePopover();
 	}
 	
+	/**
+	 * This is fired when the Save Changes button is clicked. This will only update the title/description on the lot.
+	 */
 	@SuppressWarnings("deprecation")
 	public void saveChangedButtonClicked() {
 		// Write the changes onto the object
@@ -190,10 +227,18 @@ public class LotOwnerOptionsController implements Initializable  {
 		}
 	}
 	
+	/**
+	 * This function will close the popover which this view is contained within.
+	 */
 	private void closePopover() {
 		this.po.hide();
 	}
 
+	/** 
+	 * This will build a single string of the errors ready for displaying from an ArrayList.
+	 * @param errors the errors
+	 * @return String the concatinated errors 
+	 */
 	private String buildErrorString(ArrayList<String> errors) {
 		String builtString = "";
 		for(String s : errors)  {

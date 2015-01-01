@@ -7,7 +7,6 @@ import org.controlsfx.dialog.Dialogs;
 import com.jobbrown.auction_room.exceptions.IncorrectLoginException;
 import com.jobbrown.auction_room.helpers.JavaSpacesUserService;
 import com.jobbrown.auction_room.interfaces.helpers.UserService;
-import com.jobbrown.auction_room.thirdparty.gallen.SpaceUtils;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -18,7 +17,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
-import net.jini.space.JavaSpace;
 
 @SuppressWarnings("deprecation")
 public class LoginWindowController {
@@ -37,6 +35,11 @@ public class LoginWindowController {
     public LoginWindowController() {
     }
 
+    /**
+     * This handles registering someone for the application.  After checking fields are unique it 
+     * creates the login and informs the user they can login.
+     * @return boolean success
+     */
     @FXML public boolean registerButtonClicked() {
     	if(validateRegistrationForm()) {
     		// Lets check if the username or e-mail are taken
@@ -90,6 +93,11 @@ public class LoginWindowController {
     	return false;
     }
     
+    /**
+     * This is fired when the login button is clicked. It validates the login and takes care of
+     * opening the main window view.
+     * @param event
+     */
     @FXML public void loginButtonClicked(ActionEvent event) {
         if(validateLoginForm()) {
             // Check if the login is value
@@ -123,6 +131,10 @@ public class LoginWindowController {
         }
     }
     
+    /**
+     * This validates the registration form (ensuring fields are set) 
+     * @return boolean valid or not
+     */
     private boolean validateRegistrationForm() {
     	if(registerUsername.getText().length() == 0 || registerPassword.getText().length() == 0 || registerEmail.getText().length() == 0) {
     		Dialogs.create()
@@ -137,6 +149,10 @@ public class LoginWindowController {
     	return true;
     }
 
+    /**
+     * This validates the login form (ensuring both fields are set)
+     * @return boolean valid or not
+     */
     private boolean validateLoginForm() {
         // Check for a blank username or password
         if(loginUsername.getText().length() == 0 || loginPassword.getText().length() == 0) {
@@ -151,5 +167,4 @@ public class LoginWindowController {
 
         return true;
     }
-
 }

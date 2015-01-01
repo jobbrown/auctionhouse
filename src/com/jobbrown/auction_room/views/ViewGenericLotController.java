@@ -33,6 +33,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.util.Callback;
 
+@SuppressWarnings("deprecation")
 public class ViewGenericLotController implements Initializable  {
 	public Lot lot = null;
 	public MainWindowController parent = null;
@@ -161,7 +162,6 @@ public class ViewGenericLotController implements Initializable  {
 	 * This method takes care of preparing the table to be viewed. It binds each column
 	 * to a property of the Bid class so that Bids can be displayed on the table. 
 	 */
-	@SuppressWarnings("unchecked")
 	private void preloadTable() {
 		
 		tcBidder.setCellValueFactory(new Callback<CellDataFeatures<Bid, String>, ObservableValue<String>>() {

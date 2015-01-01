@@ -24,6 +24,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 
+@SuppressWarnings("deprecation")
 public class CreateGenericLotController implements Initializable  {
 	public MainWindowController parent = null;
 	
@@ -34,6 +35,10 @@ public class CreateGenericLotController implements Initializable  {
 	@FXML public TextField lotStartingPrice;
 	@FXML public Button lotSubmit;
 	
+	/**
+	 * This is called when the controller is initialized by JavaFX. Call the preload function to allow
+	 * preloading of anything required
+	 */
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		preload();
@@ -132,18 +137,22 @@ public class CreateGenericLotController implements Initializable  {
 			LotService ls = new JavaSpacesLotService();
 			
 			if(ls.addLot(newLot)) {
+				// We were successful in adding the lot, tell them
 				Dialogs.create()
 				.owner(view)
 				.masthead("Success")
 				.message("That lot has been added to the system.")
 				.showInformation();
 				
+				// Click the search button (hacky way to reload it)
 				parent.searchButtonClicked();
 				
+				// Change the active tab
 				SingleSelectionModel<Tab> selectionModel = parent.tabPane.getSelectionModel();
 				selectionModel.select(0);
 				
 			} else {
+				// Failed to add the lot, weird error, shouldn't happen
 				Dialogs.create()
 				.owner(view)
 				.masthead("Error")
@@ -152,6 +161,7 @@ public class CreateGenericLotController implements Initializable  {
 			}
 			
 		} else {
+			// The form wasn't valid, display the validation errors
 			Dialogs.create()
 			.owner(view)
 			.masthead("Validation Error")

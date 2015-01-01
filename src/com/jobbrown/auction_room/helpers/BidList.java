@@ -18,6 +18,10 @@ public class BidList {
 		}
 	}
 	
+	/**
+	 * Get an arraylist of the bids represented by this bidlist
+	 * @return ArrayList<Bid>
+	 */
 	public ArrayList<Bid> get() {
 		if(this.count() == 0) {
 			return null;
@@ -25,6 +29,10 @@ public class BidList {
 		return this.bidList;
 	}
 	
+	/**
+	 * Return the first bid in this bidlist
+	 * @return
+	 */
 	public Bid one() {
 		if(this.count() == 0) {
 			return null;
@@ -32,6 +40,10 @@ public class BidList {
 		return this.bidList.get(0);
 	}
 	
+	/**
+	 * Sort the bid list small -> large
+	 * @return BidList
+	 */
 	public BidList sortBySmallestBid() {
 		ArrayList<Bid> bidCopy = new ArrayList<Bid>(bidList);
 		
@@ -45,6 +57,10 @@ public class BidList {
 		return new BidList(bidCopy);
 	}
 	
+	/**
+	 * Sort the bid list by large -> small
+	 * @return BidList
+	 */
 	public BidList sortByLargestBid() {
 		ArrayList<Bid> bidCopy = new ArrayList<Bid>(bidList);
 		
@@ -58,6 +74,10 @@ public class BidList {
 		return new BidList(bidCopy);
 	}
 	
+	/**
+	 * Sort the bid list by old -> new
+	 * @return BidList
+	 */
 	public BidList sortByOldest() {
 		ArrayList<Bid> bidCopy = new ArrayList<Bid>(bidList);
 		
@@ -71,6 +91,10 @@ public class BidList {
 		return new BidList(bidCopy);
 	}
 	
+	/**
+	 * Sort the bid list by new -> old
+	 * @return BidList
+	 */
 	public BidList sortByNewest() {
 		ArrayList<Bid> bidCopy = new ArrayList<Bid>(bidList);
 		
@@ -84,6 +108,10 @@ public class BidList {
 		return new BidList(bidCopy);
 	}
 	
+	/**
+	 * Return only private bids
+	 * @return BidList
+	 */
 	public BidList onlyPrivate() {
 		ArrayList<Bid> newBidList = new ArrayList<Bid>();
 		
@@ -96,6 +124,10 @@ public class BidList {
 		return new BidList(newBidList);
 	}
 	
+	/**
+	 * Return only public bids
+	 * @return BidList
+	 */
 	public BidList onlyPublic() {
 		ArrayList<Bid> newBidList = new ArrayList<Bid>();
 		
@@ -111,6 +143,10 @@ public class BidList {
 		return new BidList(newBidList);
 	}
 	
+	/**
+	 * Returns how many bids there are in this BidList
+	 * @return int
+	 */
 	public int count() {
 		if(this.bidList == null) {
 			return 0;

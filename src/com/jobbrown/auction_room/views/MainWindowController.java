@@ -31,12 +31,12 @@ import com.jobbrown.auction_room.helpers.BidList;
 import com.jobbrown.auction_room.helpers.JavaSpacesLotService;
 import com.jobbrown.auction_room.helpers.JavaSpacesUserService;
 import com.jobbrown.auction_room.helpers.LotList;
-import com.jobbrown.auction_room.interfaces.helpers.LotService;
 import com.jobbrown.auction_room.interfaces.helpers.UserService;
 import com.jobbrown.auction_room.models.Bid;
 import com.jobbrown.auction_room.models.Lot;
 import com.jobbrown.auction_room.models.User;
 
+@SuppressWarnings("deprecation")
 public class MainWindowController implements Initializable {
 	// Main Window
 	@FXML public TabPane tabPane;
@@ -73,6 +73,10 @@ public class MainWindowController implements Initializable {
 	// View Lots
 	
 
+	/**
+	 * This function will be called automatically when the controller is initialized by JavaFX
+	 * Its used to preload some of the GUI options (such as tables and dropdown options)
+	 */
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		preloadLotTypeComboBox();
@@ -84,6 +88,10 @@ public class MainWindowController implements Initializable {
 	
 	// View Lots Tab
 	
+	/**
+	 * This function is fired when the search button is clicked, determine which values have been changed
+	 * then pass it to the fillTable method to filter the table
+	 */
 	public void searchButtonClicked() {
 		String lotName = null;
 		Category lotCategory = null;
@@ -99,6 +107,10 @@ public class MainWindowController implements Initializable {
 		fillTable(lotName, lotCategory);
 	}
 	
+	/**
+	 * This function is fired when the reset button is clicked. Unset the values on the search form and then
+	 * fire the fillTable method with null values to reload everything
+	 */
 	public void searchResetButtonClicked() {
 		searchLotName.setText("");
 		searchLotCategory.getSelectionModel().select(-1);
@@ -107,7 +119,11 @@ public class MainWindowController implements Initializable {
 	}
 	
 	
-	@SuppressWarnings({ "unchecked", "deprecation" })
+	/**
+	 * This function takes care of binding the table columns to specific attributes on the Lot class
+	 * At the end of the function, it also fires the fillTable method to load the table
+	 */
+	@SuppressWarnings({ "deprecation" })
 	public void preloadTable() {
 		// Bind "id" to tcID
 		
@@ -227,20 +243,14 @@ public class MainWindowController implements Initializable {
             }
         });
 		
-		String lotName = null; 
-		Category lotCategory = null;
-		
-		if(searchLotName.getText().length() > 0){
-			lotName = searchLotName.getText();
-		}
-		
-		if(searchLotCategory.getSelectionModel().getSelectedItem() != null) {
-			lotCategory = searchLotCategory.getSelectionModel().getSelectedItem();
-		}
-		
-		fillTable(lotName, lotCategory);
+		this.searchButtonClicked();
 	}
 	
+	/**
+	 * This method is fired when a lot is selected. First we must determine what TYPE the lot is, and then
+	 * load the approapiate view for that Lot. Finally pass it the lot to load.
+	 * @param t the lot to load
+	 */
 	public void loadDetailedLotPane(Lot t) {		
 		switch(t.category.getCode()) {
 		case "COLLECTABLES":
@@ -256,7 +266,7 @@ public class MainWindowController implements Initializable {
 			viewLotPane.setCenter(viewGenericLotController.view);
 			break;
 		default:
-			viewLotPane.setCenter(createGenericLotController.view);
+			viewLotPane.setCenter(viewGenericLotController.view);
 			break;
 		}
 		
@@ -267,9 +277,12 @@ public class MainWindowController implements Initializable {
 		}
 	}
 	
+	/**
+	 * Fills the tables with lots. Can also accept params to filter the table, this is how the search is implemented.
+	 * @param lotName filter the table by this value on "title" of the lot
+	 * @param category filter the table by this value on "category" of the lot
+	 */
 	public void fillTable(String lotName, Category category) {
-		LotService ls = new JavaSpacesLotService();
-		
 		LotList lots = new LotList().active();
 		
 		if(lotName != null) {
@@ -293,7 +306,10 @@ public class MainWindowController implements Initializable {
 	
 	
 	// Create Lot Tab
-	
+	/**
+	 * This method is fired when the lot type dropdown is changed on the Create Lot Tab.
+	 * It gets the Category selected and then fires the loadAddLotForm method.
+	 */
 	@FXML public void lotTypeChanged() {
 		// Load the correct panel in
 		Category selectedCategory = createLotLotType.getSelectionModel().getSelectedItem();
@@ -301,8 +317,6 @@ public class MainWindowController implements Initializable {
 		this.loadAddLotForm(selectedCategory);
 		
 	}
-	
-	// My Account Tab
 	
 	/**
 	 * Given a category, loads the approapiate view for adding that lot
@@ -335,28 +349,20 @@ public class MainWindowController implements Initializable {
 	private void preloadControllers() {
 		FXMLLoader fxmlLoader = null;
 		
-		Pane p = null;
-		
 		try {
 			// VIEW Controllers
 			
-			//FXMLLoader loader = new FXMLLoader();
-	        //loader.setLocation(MainApp.class.getResource("view/RootLayout.fxml"));
-	        //rootLayout = (BorderPane) loader.load();
-			
 			fxmlLoader = new FXMLLoader();
 			fxmlLoader.setLocation(MainWindowController.class.getResource("ViewGenericLot.fxml"));
-			p = fxmlLoader.load();
+			fxmlLoader.load();
 			this.viewGenericLotController = (ViewGenericLotController) fxmlLoader.getController();
 			this.viewGenericLotController.parent = this;
 			
-			//p = fxmlLoader.load(getClass().getResource("ViewGenericLot.fxml").openStream());
-			//this.viewGenericLotController = (ViewGenericLotController) fxmlLoader.getController();
 			
 			fxmlLoader = new FXMLLoader();
 			
 			// CREATE Controllers
-			p = fxmlLoader.load(getClass().getResource("CreateGenericLot.fxml").openStream());
+			fxmlLoader.load(getClass().getResource("CreateGenericLot.fxml").openStream());
 			this.createGenericLotController = (CreateGenericLotController) fxmlLoader.getController();
 			this.createGenericLotController.parent = this;
 			
@@ -378,6 +384,9 @@ public class MainWindowController implements Initializable {
 		createLotLotType.setItems(options);
 	}
 	
+	/**
+	 * Preloads Category optiosn into the Combo Box on the search Pane on the main window
+	 */
 	private void preloadLotSearchCategoryComboBox() {
 		ObservableList<Category> options = 
 			    FXCollections.observableArrayList(

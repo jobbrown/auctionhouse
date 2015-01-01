@@ -7,7 +7,8 @@ import java.util.Date;
  * Created by job on 21/10/14.
  */
 public class Bid implements Serializable {
-	
+	private static final long serialVersionUID = -1716155005012038439L;
+
 	// is this a public bid
 	public boolean publicBid;
 	

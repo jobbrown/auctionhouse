@@ -202,7 +202,8 @@ public class JavaSpacesLotService implements LotService {
      * @throws LotNotFoundException 
      * @throws LotNotActiveException 
      */
-    public boolean addBidToLot(Lot t, Bid b) throws LotNotFoundException, LotNotActiveException {
+    @SuppressWarnings("finally")
+	public boolean addBidToLot(Lot t, Bid b) throws LotNotFoundException, LotNotActiveException {
     	// Create a transaction
     	TransactionService ts = new JavaSpacesTransactionService();
         Transaction transaction = ts.getTransaction();
