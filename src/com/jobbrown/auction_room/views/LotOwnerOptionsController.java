@@ -4,15 +4,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
-import net.jini.core.transaction.Transaction;
 
 import org.controlsfx.control.PopOver;
 import org.controlsfx.dialog.Dialogs;
 
 import com.jobbrown.auction_room.exceptions.LotNotFoundException;
 import com.jobbrown.auction_room.helpers.JavaSpacesLotService;
-import com.jobbrown.auction_room.helpers.JavaSpacesTransactionService;
-import com.jobbrown.auction_room.interfaces.helpers.TransactionService;
 import com.jobbrown.auction_room.models.Lot;
 
 import javafx.fxml.FXML;
