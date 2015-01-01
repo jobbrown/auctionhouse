@@ -21,6 +21,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.util.Callback;
@@ -65,8 +66,9 @@ public class MainWindowController implements Initializable {
 	private CreateGenericLotController createGenericLotController;
 	private ViewGenericLotController viewGenericLotController;
 	
-	
-	// My Account Tab
+	// Searching Options
+	@FXML public TextField searchLotName;
+	@FXML public ComboBox<Category> searchLotCategory;
 	
 	// View Lots
 	
@@ -74,21 +76,36 @@ public class MainWindowController implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		preloadLotTypeComboBox();
+		preloadLotSearchCategoryComboBox();
 		preloadTable();
 		preloadControllers();
 	}
-	
-	// Methods
-	
-	
-	
 	
 	
 	// View Lots Tab
 	
 	public void searchButtonClicked() {
-		fillTable();
+		String lotName = null;
+		Category lotCategory = null;
+		
+		if(searchLotName.getText().length() > 0){
+			lotName = searchLotName.getText();
+		}
+		
+		if(searchLotCategory.getSelectionModel().getSelectedItem() != null) {
+			lotCategory = searchLotCategory.getSelectionModel().getSelectedItem();
+		}
+		
+		fillTable(lotName, lotCategory);
 	}
+	
+	public void searchResetButtonClicked() {
+		searchLotName.setText("");
+		searchLotCategory.getSelectionModel().select(-1);
+		
+		fillTable(null, null);
+	}
+	
 	
 	@SuppressWarnings({ "unchecked", "deprecation" })
 	public void preloadTable() {
@@ -210,7 +227,18 @@ public class MainWindowController implements Initializable {
             }
         });
 		
-		fillTable();
+		String lotName = null; 
+		Category lotCategory = null;
+		
+		if(searchLotName.getText().length() > 0){
+			lotName = searchLotName.getText();
+		}
+		
+		if(searchLotCategory.getSelectionModel().getSelectedItem() != null) {
+			lotCategory = searchLotCategory.getSelectionModel().getSelectedItem();
+		}
+		
+		fillTable(lotName, lotCategory);
 	}
 	
 	public void loadDetailedLotPane(Lot t) {		
@@ -239,11 +267,21 @@ public class MainWindowController implements Initializable {
 		}
 	}
 	
-	public void fillTable() {
+	public void fillTable(String lotName, Category category) {
 		LotService ls = new JavaSpacesLotService();
 		
+		LotList lots = new LotList().active();
+		
+		if(lotName != null) {
+			lots = lots.filterByLotName(lotName);
+		}
+		
+		if(category != null) {
+			lots = lots.filterByLotCategory(category);
+		}
+		
 		final ObservableList<Lot> data = FXCollections.observableArrayList(
-		    new LotList().active().all()
+		    lots.all()
 		);
 		
 		if(lotsTable != null) {
@@ -338,5 +376,13 @@ public class MainWindowController implements Initializable {
 			    		Category.values()
 			    );
 		createLotLotType.setItems(options);
+	}
+	
+	private void preloadLotSearchCategoryComboBox() {
+		ObservableList<Category> options = 
+			    FXCollections.observableArrayList(
+			    		Category.values()
+			    );
+		searchLotCategory.setItems(options);
 	}
 }

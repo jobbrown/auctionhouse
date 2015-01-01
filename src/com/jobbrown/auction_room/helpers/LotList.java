@@ -1,5 +1,6 @@
 package com.jobbrown.auction_room.helpers;
 
+import com.jobbrown.auction_room.enums.Category;
 import com.jobbrown.auction_room.models.Bid;
 import com.jobbrown.auction_room.models.Lot;
 import com.jobbrown.auction_room.thirdparty.gallen.SpaceUtils;
@@ -76,6 +77,36 @@ public class LotList {
 		for(Lot lot : lotList) {
 			if(lot != null) {
 				if(!lot.active == false) {
+					newLotList.add(lot);
+				}
+			}
+		}
+		
+		return new LotList(newLotList);
+	}
+	
+	public LotList filterByLotName(String lotName) {
+		ArrayList<Lot> newLotList = new ArrayList<Lot>();
+		
+		// Go through all the bids, only pull out public or the active users bids
+		for(Lot lot : lotList) {
+			if(lot != null) {
+				if(lot.title.contains(lotName) || lot.title.equals(lotName)) {
+					newLotList.add(lot);
+				}
+			}
+		}
+		
+		return new LotList(newLotList);
+	}
+	
+	public LotList filterByLotCategory(Category category) {
+		ArrayList<Lot> newLotList = new ArrayList<Lot>();
+		
+		// Go through all the bids, only pull out public or the active users bids
+		for(Lot lot : lotList) {
+			if(lot != null) {
+				if(lot.category.equals(category)) {
 					newLotList.add(lot);
 				}
 			}
