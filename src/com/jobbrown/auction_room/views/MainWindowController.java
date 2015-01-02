@@ -514,32 +514,6 @@ public class MainWindowController implements Initializable, RemoteEventListener 
 		searchLotCategory.setItems(options);
 	}
 	
-	/*
-	private void registerNotificationHandler() {
-		JavaSpacesNotificationService ns = new JavaSpacesNotificationService();
-		JavaSpacesUserService us = JavaSpacesUserService.getInstance();
-	
-		CallBack myCallBack = new CallBack() {
-			@Override
-			public void notified() {
-				System.out.println("Triggered");
-				MainWindowController.this.receivedNotification();
-			}
-		};
-		
-		// Make a quick template
-		Notification template = new Notification();
-		template.owner = us.getCurrentUser().username;
-		
-		System.out.println("Registering to receive notifications on:\n");
-		System.out.println(template);
-		System.out.println("\n\n");
-		
-		// Register the callback
-		ns.createCallBack(template, myCallBack);
-	}
-	*/
-	
 	private void registerNotificationHandler() {
 		JavaSpacesNotificationService ns = new JavaSpacesNotificationService();
 		JavaSpacesUserService us = JavaSpacesUserService.getInstance();

@@ -193,9 +193,8 @@ public class LotOwnerOptionsController implements Initializable  {
 				ns.channelName = highestBid.bidder.username;
 				
 				if(ns.addNotification(notification)) {
-					System.out.println("Success");
 				} else {
-					System.out.println("Failure");
+					System.out.println("Failed to add Notification");
 				}
 				
 				// Show message

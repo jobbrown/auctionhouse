@@ -42,7 +42,6 @@ public class JavaSpacesNotificationService {
 		RemoteEventListener rel = new RemoteEventListener() {
 			@Override
 			public void notify(RemoteEvent e) throws UnknownEventException, RemoteException {
-				System.out.println("Activated");
 				cb.notified();
 			}
 		};
@@ -57,7 +56,6 @@ public class JavaSpacesNotificationService {
 			
 			space.notify(template, null, relE, Lease.FOREVER, null);
 			
-			System.out.println("Finished registering");
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			System.out.println("Exception here");

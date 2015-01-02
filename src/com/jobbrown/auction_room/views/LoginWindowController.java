@@ -1,6 +1,9 @@
 package com.jobbrown.auction_room.views;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.controlsfx.dialog.Dialogs;
 
@@ -41,7 +44,7 @@ public class LoginWindowController {
      * @return boolean success
      */
     @FXML public boolean registerButtonClicked() {
-    	if(validateRegistrationForm()) {
+    	if(isRegistrationValid()) {
     		// Lets check if the username or e-mail are taken
     		UserService us = JavaSpacesUserService.getInstance();
     		
@@ -88,6 +91,12 @@ public class LoginWindowController {
     			
         		return false;
     		}   		
+    	} else {
+    		Dialogs.create()
+			.owner(view)
+			.masthead("Registration Validation Errors")
+			.message(this.buildErrorString(this.getRegististrationValidationErrors()))
+			.showError();
     	}
     	
     	return false;
@@ -131,6 +140,34 @@ public class LoginWindowController {
         }
     }
     
+    private boolean isRegistrationValid() {
+    	return getRegististrationValidationErrors().size() == 0;
+    }
+    
+    private ArrayList<String> getRegististrationValidationErrors() {
+    	ArrayList<String> errors = new ArrayList<String>();
+    	
+    	if(registerUsername.getText().length() < 3) {
+    		errors.add("Username should be atleast 3 characters long");
+    	}
+    	
+    	if(registerPassword.getText().length() < 4) {
+    		errors.add("Password should be atleast 4 characters long");
+    	}
+    	
+    	// Email Validation
+    	Pattern pattern = Pattern.compile("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+    			+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
+    	
+    	Matcher matcher = pattern.matcher(registerEmail.getText());
+    	
+    	if(!matcher.matches()) {
+    		errors.add("Please enter a valid email address");
+    	}
+    	
+    	return errors;
+    }
+    
     /**
      * This validates the registration form (ensuring fields are set) 
      * @return boolean valid or not
@@ -167,4 +204,17 @@ public class LoginWindowController {
 
         return true;
     }
+    
+    /** 
+	 * This will build a single string of the errors ready for displaying from an ArrayList.
+	 * @param errors the errors
+	 * @return String the concatinated errors 
+	 */
+	private String buildErrorString(ArrayList<String> errors) {
+		String builtString = "";
+		for(String s : errors)  {
+			builtString = builtString + s + "\n\n";
+		}
+		return builtString;
+	}
 }

@@ -11,9 +11,12 @@ import org.controlsfx.dialog.Dialogs;
 import com.jobbrown.auction_room.exceptions.LotNotActiveException;
 import com.jobbrown.auction_room.exceptions.LotNotFoundException;
 import com.jobbrown.auction_room.helpers.JavaSpacesLotService;
+import com.jobbrown.auction_room.helpers.JavaSpacesNotificationService;
 import com.jobbrown.auction_room.helpers.JavaSpacesUserService;
 import com.jobbrown.auction_room.models.Bid;
 import com.jobbrown.auction_room.models.Lot;
+import com.jobbrown.auction_room.models.Notification;
+import com.jobbrown.auction_room.models.User;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -127,6 +130,24 @@ public class AddBidController implements Initializable {
 			
 			try {
 				if(ls.addBidToLot(this.lot, newBid)) {
+					// Notify the lot owner a bid has been made
+					
+					// Get the lot sellers username
+					User lotSeller = us.getUserByID(this.lot.seller);
+					
+					// Create a notification for the owner
+					Notification notification = new Notification(
+							"Somebody just bid on your lot \"" + this.lot.title + "\"! " + newBid.bidder.username + " just bid £" + newBid.amount, 
+							lotSeller.username);
+					
+					JavaSpacesNotificationService ns = new JavaSpacesNotificationService();
+					ns.channelName = lotSeller.username;
+					
+					if(ns.addNotification(notification)) {
+					} else {
+						System.out.println("Failed to add notification to system");
+					}
+					
 					Dialogs.create()
 						.owner(this.popover)
 						.title("Success")
@@ -174,6 +195,10 @@ public class AddBidController implements Initializable {
 				if(price < 0) {
 					errors.add("Bid amount should be greater than 0");
 				}
+				
+				if(price <= this.lot.price) {
+					errors.add("Bid should be higher than starting price: £" + this.lot.price);
+				}
 			} catch (NumberFormatException e) {
 				errors.add("You should supply bid value in format AB.YZ eg 12.55 or 12.00");
 			}
@@ -182,6 +207,13 @@ public class AddBidController implements Initializable {
 		if(publicPrivateBid.getSelectionModel().getSelectedIndex() == -1) {
 			errors.add("Select whether you would like this bid to be public or private");
 		}		
+		
+		// Final active check
+		this.setLot(this.lot);
+		
+		if(!this.lot.active) {
+			errors.add("Oops! That lot has been removed from sale. Sorry about that");
+		}
 		
 		return errors;
 	}

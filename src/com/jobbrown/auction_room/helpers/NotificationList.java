@@ -12,7 +12,6 @@ public class NotificationList {
 	public NotificationList() {
 		JavaSpacesNotificationService ns = new JavaSpacesNotificationService();
 		this.notificationList = ns.getAllNotifications();
-		System.out.println(this.notificationList);
 	}
 	
 	public NotificationList(ArrayList<Notification> list) {
