@@ -8,7 +8,9 @@ import java.util.ResourceBundle;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.dialog.Dialogs;
 
+import com.jobbrown.auction_room.exceptions.LotNotFoundException;
 import com.jobbrown.auction_room.helpers.BidList;
+import com.jobbrown.auction_room.helpers.JavaSpacesLotService;
 import com.jobbrown.auction_room.helpers.JavaSpacesUserService;
 import com.jobbrown.auction_room.interfaces.helpers.UserService;
 import com.jobbrown.auction_room.models.Bid;
@@ -69,17 +71,30 @@ public class ViewGenericLotController implements Initializable  {
 	 */
 	@SuppressWarnings("deprecation")
 	public void loadLot(Lot t) {
-		if(!t.active) {
-			Dialogs.create()
-				.owner(view)
-				.masthead("Error")
-				.message("That auction has been removed from sale.")
-				.showError();
+		// Reload it from the space
+		JavaSpacesLotService ls = new JavaSpacesLotService();
+		
+		Lot returnedLot = null;
+		try {
+			returnedLot = (Lot) ls.searchForLot(t);
+		} catch (LotNotFoundException e) {
+			System.out.println("Unexpected error in AddBidController");
+		}
+		
+		if(returnedLot != null) {
+			this.lot = returnedLot;
 			
-			this.parent.searchButtonClicked();
-		} else {
-			this.lot = t;
-			this.loadLot();
+			if(!this.lot.active) {
+				Dialogs.create()
+					.owner(view)
+					.masthead("Error")
+					.message("That auction has been removed from sale.")
+					.showError();
+				
+				this.parent.searchButtonClicked();
+			} else {
+				this.loadLot();
+			}
 		}
 	}
 	
@@ -99,7 +114,14 @@ public class ViewGenericLotController implements Initializable  {
 		BidList bl = new BidList(this.lot.bids);
 		
 		if(bl.count() > 0) {
-			ArrayList<Bid> bids = bl.onlyPublic().sortByNewest().get();
+			JavaSpacesUserService us = JavaSpacesUserService.getInstance();
+			
+			ArrayList<Bid> bids = null;
+			if(this.lot.seller.equals(us.getCurrentUser().id)) {
+				bids = bl.sortByNewest().get();
+			} else {
+				bids = bl.onlyPublic().sortByNewest().get();
+			}
 			
 			final ObservableList<Bid> data = FXCollections.observableArrayList(
 			    bids
@@ -131,24 +153,31 @@ public class ViewGenericLotController implements Initializable  {
 			System.out.println("Table was null. WTF");
 		} else {
 			ObservableList<Bid> data = null;
+			JavaSpacesUserService us = JavaSpacesUserService.getInstance();
 			
-			bl = new BidList(this.lot.bids);			
+			bl = new BidList(this.lot.bids);	
+			
+			if(this.lot.seller.equals(us.getCurrentUser().id)) {
+				bl = bl.sortByNewest();
+			} else {
+				bl = bl.onlyPublic().sortByNewest();
+			}
 			
 			if(this.lot.bids != null && this.lot.bids.size() > 0) {
 				data = FXCollections.observableArrayList(
-						bl.onlyPublic().get()
+						bl.get()
 				);
 			} else {
 				data = FXCollections.observableArrayList(
 						new ArrayList<Bid>()
 				);
 			}
-				
+			
 			bidsTable.setItems(data);
 		}
 		
 		// Starting time
-		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh:ss");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
 		this.startingTime.setText(dateFormat.format(this.lot.startTime));
 		
 		// Ending time
@@ -156,6 +185,7 @@ public class ViewGenericLotController implements Initializable  {
 		
 		// Owner button
 		this.prepareOwnerButton();
+		this.prepareAddBiddButton();
 	}
 	
 	/**
@@ -186,7 +216,7 @@ public class ViewGenericLotController implements Initializable  {
 		    @Override
 		    public ObservableValue<String> call(
 		    	CellDataFeatures<Bid, String> c) {
-		    		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh:ss");
+		    		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
 		    		return new SimpleStringProperty(dateFormat.format(c.getValue().date));
 		     	}
 		    }
@@ -267,6 +297,17 @@ public class ViewGenericLotController implements Initializable  {
 			ownerOptionsButton.setVisible(true);
 		} else {
 			ownerOptionsButton.setVisible(false);
+		}
+	}
+	
+	public void prepareAddBiddButton() {
+		UserService us = JavaSpacesUserService.getInstance();
+		User lotSeller = us.getUserByID(this.lot.seller);
+		
+		if(lotSeller != null && us.getCurrentUser().id.equals(lotSeller.id)) {
+			addBidButton.setVisible(false);
+		} else {
+			addBidButton.setVisible(true);
 		}
 	}
 	

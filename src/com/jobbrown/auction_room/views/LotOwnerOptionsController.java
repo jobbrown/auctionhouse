@@ -8,8 +8,12 @@ import org.controlsfx.control.PopOver;
 import org.controlsfx.dialog.Dialogs;
 
 import com.jobbrown.auction_room.exceptions.LotNotFoundException;
+import com.jobbrown.auction_room.helpers.BidList;
 import com.jobbrown.auction_room.helpers.JavaSpacesLotService;
+import com.jobbrown.auction_room.helpers.JavaSpacesNotificationService;
+import com.jobbrown.auction_room.models.Bid;
 import com.jobbrown.auction_room.models.Lot;
+import com.jobbrown.auction_room.models.Notification;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -144,23 +148,67 @@ public class LotOwnerOptionsController implements Initializable  {
 	 */
 	@SuppressWarnings("deprecation")
 	public void endBidHighestBidderButtonClicked() {
+		JavaSpacesLotService ls = new JavaSpacesLotService();
+		
 		// Get the lot
+		Lot searchLot = ls.stripAllProperties(this.lot);
+		Lot returnedLot = null;
 		
-		// Copy the highest bid into winningBid
-
-		// Set active to false
+		try {
+			returnedLot = (Lot) ls.searchForLot(searchLot);
+		} catch (LotNotFoundException e) {
+			e.printStackTrace();
+		}
 		
-		// Write it back
+		if(returnedLot == null) {
+			System.out.println("Unexcepted error");
+		} else {
+			// Load the bidlist
+			BidList bl = new BidList(returnedLot.bids);
+			
+			// Check we have some bids
+			if(bl.count() == 0) {
+				// There aren't any bids
+				Dialogs.create()
+					.owner(this.po)
+					.title("error")
+					.masthead("No Bids")
+					.message("There are no bids on that lot - you can't accept the highest bid when there isn't one")
+					.showError();
+			} else {
+				// Copy the highest bid into winningBid
+				Bid highestBid = bl.sortByLargestBid().one();
+				returnedLot.winningBid = highestBid;
+				
+				// Set active to false
+				returnedLot.active = false;
+				
+				// Write it back
+				ls.updateLot(returnedLot);
+				
+				// Notify the winner
+				Notification notification = new Notification("Your bid has just been confirmed as the winning bid for " + returnedLot.title, highestBid.bidder.username);
+				
+				JavaSpacesNotificationService ns = new JavaSpacesNotificationService();
+				ns.channelName = highestBid.bidder.username;
+				
+				if(ns.addNotification(notification)) {
+					System.out.println("Success");
+				} else {
+					System.out.println("Failure");
+				}
+				
+				// Show message
+				Dialogs.create()
+					.owner(this.po)
+					.title("Lot Completed")
+					.masthead("That lot has been ended.")
+					.message("That lot has been removed from sale. The winning bidder has been notified")
+					.showInformation();
+			}
+		}
 		
-		// Notify the winner
 		
-		// Show message
-		Dialogs.create()
-			.owner(this.po)
-			.title("Lot Completed")
-			.masthead("That lot has been ended.")
-			.message("That lot has been removed from sale. The winning bidder has been notified")
-			.showInformation();
 		
 		// Close the popover
 		this.closePopover();

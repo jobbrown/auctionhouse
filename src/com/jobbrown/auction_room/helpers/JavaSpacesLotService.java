@@ -194,6 +194,7 @@ public class JavaSpacesLotService implements LotService {
     	
     	return false;
     }
+    
     /**
      * 
      * @param t

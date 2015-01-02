@@ -38,6 +38,6 @@ public class Bid implements Serializable {
 
     @Override
 	public String toString() {
-		return "Bid (" + publicBid + ") by User ID: " + this.bidder + " for £" + this.amount + " on " + this.date;
+		return "Bid (" + publicBid + ") by User ID: " + this.bidder.username + " for £" + this.amount + " on " + this.date;
     }
 }

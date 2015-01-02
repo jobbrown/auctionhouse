@@ -4,19 +4,6 @@ import com.jobbrown.auction_room.enums.Category;
 import com.jobbrown.auction_room.models.Lot;
 import java.util.ArrayList;
 
-/**
- * Created by job on 30/10/14.
- * This will provide the searching on the JavaSpace
- * All functions should return a LotList to allow quick chained queries.
- *
- * eg
- *
- * LotList.getAll().withID(1);
- * LotList.getAll().ownedBy(18).biddedOnBy(12);
- *
- * If its a chained call then we should use the internal results list.
- */
-
 public class LotList {
     private ArrayList<Lot> lotList = new ArrayList<Lot>();
 

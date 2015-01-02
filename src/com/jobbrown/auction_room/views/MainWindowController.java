@@ -2,12 +2,26 @@ package com.jobbrown.auction_room.views;
 
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URL;
+import java.rmi.RemoteException;
+import java.rmi.server.ExportException;
 import java.text.SimpleDateFormat;
 import java.util.ResourceBundle;
 
+import net.jini.core.event.RemoteEvent;
+import net.jini.core.event.RemoteEventListener;
+import net.jini.core.event.UnknownEventException;
+import net.jini.core.lease.Lease;
+import net.jini.export.Exporter;
+import net.jini.jeri.BasicILFactory;
+import net.jini.jeri.BasicJeriExporter;
+import net.jini.jeri.tcp.TcpServerEndpoint;
+
+import org.controlsfx.control.Notifications;
 import org.controlsfx.dialog.Dialogs;
 
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -20,24 +34,29 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
 import javafx.util.Callback;
 
 import com.jobbrown.auction_room.enums.Category;
 import com.jobbrown.auction_room.helpers.BidList;
 import com.jobbrown.auction_room.helpers.JavaSpacesLotService;
+import com.jobbrown.auction_room.helpers.JavaSpacesNotificationService;
 import com.jobbrown.auction_room.helpers.JavaSpacesUserService;
 import com.jobbrown.auction_room.helpers.LotList;
+import com.jobbrown.auction_room.helpers.NotificationList;
+import com.jobbrown.auction_room.interfaces.helpers.CallBack;
 import com.jobbrown.auction_room.interfaces.helpers.UserService;
 import com.jobbrown.auction_room.models.Bid;
 import com.jobbrown.auction_room.models.Lot;
+import com.jobbrown.auction_room.models.Notification;
 import com.jobbrown.auction_room.models.User;
+import com.jobbrown.auction_room.thirdparty.gallen.SpaceUtils;
 
 @SuppressWarnings("deprecation")
-public class MainWindowController implements Initializable {
+public class MainWindowController implements Initializable, RemoteEventListener {
 	// Main Window
 	@FXML public TabPane tabPane;
 	
@@ -62,6 +81,12 @@ public class MainWindowController implements Initializable {
 	@FXML public ComboBox<Category> createLotLotType;
 	@FXML public BorderPane createLotPane;
 	
+	// Notifications Tab
+	@FXML public TableView<Notification> notificationTable;
+	@FXML public TableColumn<Notification, String> tcNotificationID;
+	@FXML public TableColumn<Notification, String> tcNotificationDateTime;
+	@FXML public TableColumn<Notification, String> tcNotificationMessage;
+	
 	// Controllers
 	private CreateGenericLotController createGenericLotController;
 	private ViewGenericLotController viewGenericLotController;
@@ -69,8 +94,6 @@ public class MainWindowController implements Initializable {
 	// Searching Options
 	@FXML public TextField searchLotName;
 	@FXML public ComboBox<Category> searchLotCategory;
-	
-	// View Lots
 	
 
 	/**
@@ -82,7 +105,21 @@ public class MainWindowController implements Initializable {
 		preloadLotTypeComboBox();
 		preloadLotSearchCategoryComboBox();
 		preloadTable();
+		preloadNotificationTable();
 		preloadControllers();
+		registerNotificationHandler();
+		
+		/*
+		JavaSpacesUserService us = JavaSpacesUserService.getInstance();
+		if(!us.getCurrentUser().username.equals("a")) {
+			System.out.println("Adding notification for a");
+			
+			Notification not = new Notification("message for ya a", "a");
+			
+			JavaSpacesNotificationService ns = new JavaSpacesNotificationService();
+			ns.addNotification(not);
+		}
+		*/
 	}
 	
 	
@@ -93,6 +130,7 @@ public class MainWindowController implements Initializable {
 	 * then pass it to the fillTable method to filter the table
 	 */
 	public void searchButtonClicked() {
+		
 		String lotName = null;
 		Category lotCategory = null;
 		
@@ -161,7 +199,7 @@ public class MainWindowController implements Initializable {
 		    @Override
 		    public ObservableValue<String> call(
 		    	CellDataFeatures<Lot, String> c) {
-		    		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh:ss");	 
+		    		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");	 
 		      
 		    		return new SimpleStringProperty(dateFormat.format(c.getValue().endTime));
 		     	}
@@ -220,30 +258,99 @@ public class MainWindowController implements Initializable {
 		// When its selected, load the detailed panel of the bids
 		lotsTable.getSelectionModel().selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
             //Check whether item is selected and set value of selected item to Label
-            if (lotsTable.getSelectionModel().getSelectedItem() != null) {
-            	// Load it from the space and display it
-            	JavaSpacesLotService ls = new JavaSpacesLotService();
-            	
-            	Lot returnedLot = null;
-            	try {
-					returnedLot = (Lot) ls.searchForLot(newValue);
-				} catch (Exception e) {
-					Dialogs.create()
-						.owner(tabPane)
-						.masthead("Error")
-						.message("That auction has been removed from sale.")
-						.showError();
-					
-					this.searchButtonClicked();
-				}
-            	
-            	if(returnedLot != null) {
-            		this.loadDetailedLotPane(returnedLot);
+			lotTableSelectionChanged();
+        });
+		
+		lotsTable.setRowFactory( tv -> {
+		    TableRow<Lot> row = new TableRow<Lot>();
+		    row.setOnMouseClicked(event -> {
+		        if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
+		           this.lotTableSelectionChanged();
+		        }
+		    });
+		    return row ;
+		});
+		
+		this.searchButtonClicked();
+	}
+	
+	public void lotTableSelectionChanged() {
+		if (lotsTable.getSelectionModel().getSelectedItem() != null) {
+        	// Load it from the space and display it
+        	JavaSpacesLotService ls = new JavaSpacesLotService();
+        	
+        	Lot returnedLot = null;
+        	try {
+				returnedLot = (Lot) ls.searchForLot(lotsTable.getSelectionModel().getSelectedItem());
+			} catch (Exception e) {
+				Dialogs.create()
+					.owner(tabPane)
+					.masthead("Error")
+					.message("That auction has been removed from sale.")
+					.showError();
+				
+				this.searchButtonClicked();
+			}
+        	
+        	if(returnedLot != null) {
+        		this.loadDetailedLotPane(returnedLot);
+        	}
+        }
+	}
+	/**
+	 * This function takes care of binding the table columns to specific attributes on the Lot class
+	 * At the end of the function, it also fires the fillTable method to load the table
+	 */
+	@SuppressWarnings({ "deprecation" })
+	public void preloadNotificationTable() {
+		// Bind "id"
+		tcNotificationID.setCellValueFactory(new Callback<CellDataFeatures<Notification, String>, ObservableValue<String>>() {
+		    @Override
+		    public ObservableValue<String> call(
+		    	CellDataFeatures<Notification, String> c) {
+		    		return new SimpleStringProperty(c.getValue().id + "");
+		     	}
+		    }
+		);
+		
+		// Bind Date Time
+		tcNotificationDateTime.setCellValueFactory(new Callback<CellDataFeatures<Notification, String>, ObservableValue<String>>() {
+		    @Override
+		    public ObservableValue<String> call(
+		    	CellDataFeatures<Notification, String> c) {
+		    		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");	 
+		      
+		    		return new SimpleStringProperty(dateFormat.format(c.getValue().datetime));
+		     	}
+		    }
+		);
+		
+		// Bind Message
+		tcNotificationMessage.setCellValueFactory(new Callback<CellDataFeatures<Notification, String>, ObservableValue<String>>() {
+		    @Override
+		    public ObservableValue<String> call(
+		    	CellDataFeatures<Notification, String> c) {
+		    		return new SimpleStringProperty(c.getValue().message);
+		     	}
+		    }
+		);
+		
+		// When its selected mark it as read
+		/*
+		notificationTable.getSelectionModel().selectedItemProperty().addListener((observableValue, oldValue, newValue) -> {
+            //Check whether item is selected and set value of selected item to Label
+            if (notificationTable.getSelectionModel().getSelectedItem() != null) {
+            	if(!newValue.read) {
+            		// Lets change it to read
+            		
+            		JavaSpacesNotificationService ns = new JavaSpacesNotificationService();
+            		ns.markNofificationAsRead(newValue);
             	}
             }
         });
+        */
 		
-		this.searchButtonClicked();
+		this.fillNotificationTable();
 	}
 	
 	/**
@@ -277,6 +384,18 @@ public class MainWindowController implements Initializable {
 		}
 	}
 	
+	public void fillNotificationTable() {
+		NotificationList notifications = new NotificationList();
+
+		notifications = notifications.sortByNewest();
+		
+		final ObservableList<Notification> data = FXCollections.observableArrayList(
+				notifications.all()
+		);
+		
+		notificationTable.setItems(data);
+	}
+
 	/**
 	 * Fills the tables with lots. Can also accept params to filter the table, this is how the search is implemented.
 	 * @param lotName filter the table by this value on "title" of the lot
@@ -393,5 +512,82 @@ public class MainWindowController implements Initializable {
 			    		Category.values()
 			    );
 		searchLotCategory.setItems(options);
+	}
+	
+	/*
+	private void registerNotificationHandler() {
+		JavaSpacesNotificationService ns = new JavaSpacesNotificationService();
+		JavaSpacesUserService us = JavaSpacesUserService.getInstance();
+	
+		CallBack myCallBack = new CallBack() {
+			@Override
+			public void notified() {
+				System.out.println("Triggered");
+				MainWindowController.this.receivedNotification();
+			}
+		};
+		
+		// Make a quick template
+		Notification template = new Notification();
+		template.owner = us.getCurrentUser().username;
+		
+		System.out.println("Registering to receive notifications on:\n");
+		System.out.println(template);
+		System.out.println("\n\n");
+		
+		// Register the callback
+		ns.createCallBack(template, myCallBack);
+	}
+	*/
+	
+	private void registerNotificationHandler() {
+		JavaSpacesNotificationService ns = new JavaSpacesNotificationService();
+		JavaSpacesUserService us = JavaSpacesUserService.getInstance();
+		
+		// Make a quick template
+		Notification template = new Notification();
+		template.owner = us.getCurrentUser().username;
+		
+		// Create an exporter
+		Exporter myDefaultExporter = 
+				new BasicJeriExporter(TcpServerEndpoint.getInstance(0),
+						new BasicILFactory(), false, true);
+				
+		try {
+			RemoteEventListener relE = (RemoteEventListener) myDefaultExporter.export(this);
+			
+			SpaceUtils.getSpace().notify(template, null, relE, Lease.FOREVER, null);
+			
+			System.out.println("Finished registering");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+
+	@Override
+	public void notify(RemoteEvent arg0) throws UnknownEventException, RemoteException {
+		System.out.println("Triggered");
+		
+		// Get the newest notification
+		NotificationList nl = new NotificationList();
+		Notification notification = nl.sortByNewest().one();
+		
+		this.fillNotificationTable();
+		
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				Notifications.create()
+					.owner(tabPane)
+			        .title("Received notification")
+			        .text(notification.toString())
+			        .show();
+			}
+		});
+		
+		
+		
 	}
 }

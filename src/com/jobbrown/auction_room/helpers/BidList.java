@@ -23,9 +23,6 @@ public class BidList {
 	 * @return ArrayList<Bid>
 	 */
 	public ArrayList<Bid> get() {
-		if(this.count() == 0) {
-			return null;
-		}
 		return this.bidList;
 	}
 	
@@ -34,7 +31,7 @@ public class BidList {
 	 * @return
 	 */
 	public Bid one() {
-		if(this.count() == 0) {
+		if(count() == 0) {
 			return null;
 		}
 		return this.bidList.get(0);
